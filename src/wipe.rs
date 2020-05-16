@@ -30,7 +30,9 @@ pub fn wipe_folders(args: &Args) -> std::io::Result<()> {
 
     let (folder_target, wipe) = match &args.folder_name {
         FolderNameEnum::Node(opts) => ("node_modules", opts.wipe),
+        FolderNameEnum::NodeModules(opts) => ("node_modules", opts.wipe),
         FolderNameEnum::Rust(opts) => ("target", opts.wipe),
+        FolderNameEnum::Target(opts) => ("target", opts.wipe),
     };
 
     if wipe {

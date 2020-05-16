@@ -16,8 +16,13 @@ pub struct Args {
 #[derive(Debug, StructOpt)]
 pub enum FolderNameEnum {
     /// Recursively finds and optionally wipes all <node_modules> folders that are found in the current path
+    #[structopt(name = "node_modules")]
+    NodeModules(Opts),
+    /// Alias to node_modules
     Node(Opts),
     /// Recursively finds and optionally wipes all <target> folders that are found in the current path
+    Target(Opts),
+    /// Alias to target
     Rust(Opts),
 }
 

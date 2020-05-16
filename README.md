@@ -17,7 +17,7 @@ Add `-w` to wipe all folders found. USE WITH CAUTION!
 
 ## node_modules
 ```
-cargo wipe node
+cargo wipe node_modules
 ```
 Add `-w` to wipe all folders found. USE WITH CAUTION!
 
