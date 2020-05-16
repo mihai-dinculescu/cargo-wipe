@@ -1,4 +1,5 @@
 # Cargo Wipe
+[![Crates][crates_badge]][crates]\
 Cargo subcommand that recursively finds and optionally wipes all "target" or "node_modules" folders that are found in the current path.
 
 # Usage
@@ -25,3 +26,6 @@ Add `-w` to wipe all folders found. USE WITH CAUTION!
 
 # Contributions
 Contributions are welcome and encouraged! See [TODO.md](TODO.md) for ideas, or suggest your own!
+
+[crates_badge]: https://img.shields.io/crates/v/cargo-wipe.svg
+[crates]: https://crates.io/crates/cargo-wipe
