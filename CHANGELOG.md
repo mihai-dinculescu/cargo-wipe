@@ -5,6 +5,8 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased][unreleased]
+
+## [0.1.2] - 2020-05-16
 ### Fix wipe instructions
 
 ## [0.1.1] - 2020-05-16
