@@ -5,6 +5,8 @@ Cargo subcommand that recursively finds and optionally wipes all "target" or "no
 # Usage
 
 ## Install
+The [Rust toolchain](https://rustup.rs) is a prerequisite.
+
 ```
 cargo install cargo-wipe
 ```
