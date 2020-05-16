@@ -17,4 +17,6 @@ file. This change log follows the conventions of
 ### Initial Release of cargo wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
-[0.1.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/0.1.0
+[0.1.2]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.2
+[0.1.1]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.1
+[0.1.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.0
