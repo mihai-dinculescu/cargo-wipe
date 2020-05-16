@@ -1,0 +1,24 @@
+[package]
+name = "cargo-wipe"
+version = "0.1.0"
+edition = "2018"
+license = "Apache-2.0/MIT"
+authors = ["Mihai Dinculescu <mihai.dinculescu@iotic-labs.com>"]
+description = "recursively wipe target and node_modules folders"
+keywords = [ "cargo", "wipe", "clean", "target", "node_modules" ]
+readme = "README.md"
+repository = "https://github.com/mihai-dinculescu/cargo-wipe"
+
+[[bin]]
+name = "cargo-wipe"
+path = "src/bin/main.rs"
+
+[lib]
+name = "wipe"
+path = "src/lib.rs"
+
+[dependencies]
+structopt = "0.3.14"
+yansi = "0.5.0"
+num-format = "0.4.0"
+anyhow = "1.0.30"
