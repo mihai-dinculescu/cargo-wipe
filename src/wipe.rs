@@ -93,13 +93,21 @@ pub fn wipe_folders(args: &Args) -> std::io::Result<()> {
         Paint::default(total.size_formatted())
     );
 
+    println!("");
     if total.file_count > 0 {
         if !wipe {
             println!(
                 "Run {} to wipe all folders found. {}",
                 Paint::red(format!("cargo wipe node -w")),
                 Paint::red("USE WITH CAUTION!")
-            )
+            );
+            if folder_target == "target" {
+                println!(
+                    "{} In its current form, this will remove {}, irrespective of if they are Rust folders or not!",
+                    Paint::red("Warning!"),
+                    Paint::red(r#"all folders named "target""#).underline()
+                );
+            }
         } else {
             println!("{}", Paint::green("All clear!"))
         }
