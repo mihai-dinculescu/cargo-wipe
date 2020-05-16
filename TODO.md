@@ -7,4 +7,3 @@
 - Add wipe confirmation prompt
 - Validate that `target` folders are indeed Rust folders
 - Add argument to allow disabling colors
-- Add CHANGELOG.md
