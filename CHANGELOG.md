@@ -5,6 +5,7 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased][unreleased]
+### Fix wipe instructions
 
 ## [0.1.1] - 2020-05-16
 ### Add extra warning for wiping `target` folders

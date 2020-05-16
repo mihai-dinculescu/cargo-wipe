@@ -98,7 +98,7 @@ pub fn wipe_folders(args: &Args) -> std::io::Result<()> {
         if !wipe {
             println!(
                 "Run {} to wipe all folders found. {}",
-                Paint::red(format!("cargo wipe node -w")),
+                Paint::red(format!("cargo wipe {} -w", folder_target)),
                 Paint::red("USE WITH CAUTION!")
             );
             if folder_target == "target" {
