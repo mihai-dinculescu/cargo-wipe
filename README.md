@@ -24,7 +24,7 @@ cargo wipe node_modules
 Add `-w` to wipe all folders found. USE WITH CAUTION!
 
 ## Usage Example
-![alt text](https://github.com/mihai-dinculescu/cargo-wipe/blob/master/assets/screenshot.PNG "Usage Example")
+![Usage Example Screenshot](https://github.com/mihai-dinculescu/cargo-wipe/blob/master/assets/screenshot.PNG "Usage Example")
 
 # Contributions
 Contributions are welcome and encouraged! See [TODO.md](TODO.md) for ideas, or suggest your own!
