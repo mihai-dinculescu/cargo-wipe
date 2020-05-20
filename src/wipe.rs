@@ -1,61 +1,74 @@
-use crate::opts::{Args, FolderNameEnum};
-use num_format::{Locale, ToFormattedString};
-use std::path::PathBuf;
+
+use std::{path::PathBuf, io::Write};
 use yansi::Paint;
 
-pub struct DirInfo {
-    pub file_count: u64,
-    pub size: u64,
+use crate::opts::{Args, FolderNameEnum};
+use crate::dir_helpers::{dir_size, get_folders, DirInfo};
+
+#[derive(Debug, PartialEq)]
+pub struct WipeParams {
+    pub wipe: bool,
+    pub path: PathBuf,
+    pub folder_name: String,
 }
 
-impl DirInfo {
-    pub fn new(file_count: u64, size: u64) -> Self {
-        DirInfo { file_count, size }
-    }
-
-    pub fn file_count_formatted(&self) -> String {
-        let num: String = self.file_count.to_formatted_string(&Locale::en);
-        num
-    }
-
-    pub fn size_formatted(&self) -> String {
-        let num = self.size / 1024_u64.pow(2);
-        let num = num.to_formatted_string(&Locale::en);
-        num
-    }
-}
-
-pub fn wipe_folders(args: &Args) -> std::io::Result<()> {
+pub fn get_params(args: &Args) -> std::io::Result<WipeParams> {
     let path = std::env::current_dir()?;
 
-    let (folder_target, wipe) = match &args.folder_name {
+    let (folder_name, wipe) = match &args.folder_name {
         FolderNameEnum::Node(opts) => ("node_modules", opts.wipe),
         FolderNameEnum::NodeModules(opts) => ("node_modules", opts.wipe),
         FolderNameEnum::Rust(opts) => ("target", opts.wipe),
         FolderNameEnum::Target(opts) => ("target", opts.wipe),
     };
 
-    if wipe {
-        print!("{}", Paint::red("[WIPING]").bold());
+    Ok(WipeParams {
+        folder_name: folder_name.to_owned(),
+        path,
+        wipe,
+    })
+}
+
+pub fn wipe_folders<W: Write>(mut stdout: &mut W, params: &WipeParams) -> std::io::Result<()> {
+    write_header(&mut stdout, &params)?;
+    let total = write_content(&mut stdout, &params)?;
+    write_footer(&mut stdout, &params, &total)?;
+
+    Ok(())
+}
+
+fn write_header<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Result<()> {
+    if params.wipe {
+        write!(stdout, "{}", Paint::red("[WIPING]").bold())?;
     } else {
-        print!("{}", Paint::green("[DRY RUN]").bold());
+        write!(stdout, "{}", Paint::green("[DRY RUN]").bold())?;
     }
 
-    println!(
+    writeln!(
+        stdout,
         r#" Recursively searching for all "{}" folders in {} ..."#,
-        Paint::yellow(folder_target),
-        Paint::yellow(path.display()),
-    );
+        Paint::yellow(&params.folder_name),
+        Paint::yellow(params.path.display()),
+    )?;
 
-    let folders_to_delete = get_folders(path, folder_target)?;
+    writeln!(stdout, "")?;
 
-    println!(
+    writeln!(
+        stdout,
         r#"{:>18}{:>18}{:>9}{}"#,
         Paint::default("Files #").bold(),
         Paint::default("Size (MB)").bold(),
         "",
         Paint::default("Path").bold()
-    );
+    )?;
+
+    stdout.flush()?;
+
+    Ok(())
+}
+
+fn write_content<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Result<DirInfo> {
+    let folders_to_delete = get_folders(&params.path, &params.folder_name)?;
 
     let mut file_count = 0_u64;
     let mut size = 0_u64;
@@ -63,101 +76,69 @@ pub fn wipe_folders(args: &Args) -> std::io::Result<()> {
     for folder in folders_to_delete {
         let dir_info = dir_size(&folder)?;
 
-        println!(
+        writeln!(
+            stdout,
             r#"{:>18}{:>18}{:>9}{}"#,
             dir_info.file_count_formatted(),
             dir_info.size_formatted(),
             "",
             &folder
-        );
+        )?;
 
-        if wipe {
-            std::fs::remove_dir_all(folder).unwrap();
+        if params.wipe {
+            std::fs::remove_dir_all(folder)?;
         }
+
+        stdout.flush()?;
 
         file_count += dir_info.file_count;
         size += dir_info.size;
     }
 
-    let total = DirInfo { file_count, size };
+    Ok(DirInfo { file_count, size })
+}
 
-    println!("");
-    println!(
+fn write_footer<W: Write>(stdout: &mut W, params: &WipeParams, total: &DirInfo) -> std::io::Result<()> {
+    writeln!(stdout, "")?;
+    writeln!(
+        stdout,
         r#"{:>18}{:>18}"#,
         Paint::default("Total Files #").bold(),
         Paint::default("Total Size (MB)").bold()
-    );
-    println!(
+    )?;
+    writeln!(
+        stdout,
         r#"{:>18}{:>18}"#,
         Paint::default(total.file_count_formatted()),
         Paint::default(total.size_formatted())
-    );
+    )?;
+        
+    stdout.flush()?;
 
-    println!("");
+    writeln!(stdout, "")?;
     if total.file_count > 0 {
-        if !wipe {
-            println!(
+        if !params.wipe {
+            writeln!(
+                stdout,
                 "Run {} to wipe all folders found. {}",
-                Paint::red(format!("cargo wipe {} -w", folder_target)),
+                Paint::red(format!("cargo wipe {} -w", params.folder_name)),
                 Paint::red("USE WITH CAUTION!")
-            );
-            if folder_target == "target" {
-                println!(
+            )?;
+            if params.folder_name == "target" {
+                writeln!(stdout, 
                     "{} In its current form, this will remove {}, irrespective of if they are Rust folders or not!",
                     Paint::red("Warning!"),
                     Paint::red(r#"all folders named "target""#).underline()
-                );
+                )?;
             }
         } else {
-            println!("{}", Paint::green("All clear!"))
+            writeln!(stdout, "{}", Paint::green("All clear!"))?
         }
     } else {
-        println!("{}", Paint::green("Nothing found!"))
+        writeln!(stdout, "{}", Paint::green("Nothing found!"))?
     }
+        
+    stdout.flush()?;
 
     Ok(())
-}
-
-fn get_folders(path: impl Into<PathBuf>, folder_name: &str) -> std::io::Result<Vec<String>> {
-    fn walk(mut dir: std::fs::ReadDir, folder_name: &str) -> std::io::Result<Vec<String>> {
-        dir.try_fold(Vec::new(), |mut acc: Vec<String>, file| {
-            let file = file?;
-
-            let size = match file.metadata()? {
-                data if data.is_dir() => {
-                    if file.file_name() == folder_name {
-                        acc.push(file.path().display().to_string());
-                        acc
-                    } else {
-                        acc.append(&mut walk(std::fs::read_dir(file.path())?, folder_name)?);
-                        acc
-                    }
-                }
-                _ => acc,
-            };
-
-            Ok(size)
-        })
-    }
-
-    walk(std::fs::read_dir(path.into())?, folder_name)
-}
-
-fn dir_size(path: impl Into<PathBuf>) -> std::io::Result<DirInfo> {
-    fn walk(mut dir: std::fs::ReadDir) -> std::io::Result<DirInfo> {
-        dir.try_fold(DirInfo::new(0, 0), |acc, file| {
-            let file = file?;
-            let size = match file.metadata()? {
-                data if data.is_dir() => walk(std::fs::read_dir(file.path())?)?,
-                data => DirInfo::new(1, data.len()),
-            };
-
-            Ok(DirInfo::new(
-                acc.file_count + size.file_count,
-                acc.size + size.size,
-            ))
-        })
-    }
-
-    walk(std::fs::read_dir(path.into())?)
 }
