@@ -7,17 +7,20 @@ file. This change log follows the conventions of
 ## [Unreleased]
 
 ## [0.1.3] - 2020-05-21
-### Internal improvements
+### Changed
+- Internal improvements
 
 ## [0.1.2] - 2020-05-16
-### Fix wipe instructions
+### Fixed
+- Fix wipe instructions
 
 ## [0.1.1] - 2020-05-16
-### Add extra warning for wiping `target` folders
-### Add `node_modules` and `target` as valid subcommands
+### Added
+- Add extra warning for wiping `target` folders
+- Add `node_modules` and `target` as valid subcommands
 
 ## [0.1.0] - 2020-05-16
-### Initial Release of cargo wipe
+### Initial Release of cargo-wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
 [0.1.3]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.3

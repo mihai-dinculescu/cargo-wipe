@@ -1,7 +1,8 @@
 name: Crates.io
 on:
   release:
-    types: [created]
+    types:
+      - created
 jobs:
   publish:
     name: Publish
