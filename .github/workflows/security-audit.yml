@@ -1,4 +1,4 @@
-name: Rust
+name: Security
 on:
   push:
     branches:
