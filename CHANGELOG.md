@@ -5,6 +5,8 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Fixed
+- Fix message when empty directories are found
 
 ## [0.1.3] - 2020-05-21
 ### Changed

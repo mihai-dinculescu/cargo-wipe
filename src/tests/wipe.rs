@@ -6,7 +6,7 @@ use crate::tests::test_helpers::test_path::TestPath;
 use crate::wipe::{wipe_folders, WipeParams};
 
 #[parameterized(folder_name = { "node_modules", "node_modules", "target", "target" }, wipe = { false, true, false, true })]
-fn node(folder_name: &str, wipe: bool) {
+fn wipe_with_hits(folder_name: &str, wipe: bool) {
     let test_path = TestPath::new(3, folder_name);
 
     let params = WipeParams {
@@ -42,4 +42,35 @@ fn node(folder_name: &str, wipe: bool) {
         assert!(!output.contains(&expected));
         assert!(path.exists());
     }
+
+    if wipe {
+        let expected = format!("{}", Paint::green("All clear!"));
+        assert!(output.contains(&expected));
+    } else {
+        let expected = format!(
+            "Run {} to wipe all folders found. {}",
+            Paint::red(format!("cargo wipe {} -w", params.folder_name)),
+            Paint::red("USE WITH CAUTION!")
+        );
+        assert!(output.contains(&expected));
+    }
+}
+
+#[parameterized(folder_name = { "node_modules", "node_modules", "target", "target" }, wipe = { false, true, false, true })]
+fn wipe_no_hits(folder_name: &str, wipe: bool) {
+    let test_path = TestPath::new(0, folder_name);
+
+    let params = WipeParams {
+        folder_name: folder_name.to_owned(),
+        path: PathBuf::from(&test_path),
+        wipe,
+    };
+    let mut buff = Cursor::new(Vec::new());
+
+    wipe_folders(&mut buff, &params).unwrap();
+
+    let output = std::str::from_utf8(&buff.get_ref()).unwrap();
+
+    let expected = format!("{}", Paint::green("Nothing found!"));
+    assert!(output.contains(&expected));
 }

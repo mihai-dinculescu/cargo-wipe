@@ -1,43 +1,95 @@
 use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::{prelude::ThreadRng, thread_rng, Rng};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug)]
 pub struct TestPath {
+    rng: ThreadRng,
     pub path: PathBuf,
     pub hits: Vec<PathBuf>,
     pub misses: Vec<PathBuf>,
 }
 
+impl Drop for TestPath {
+    fn drop(&mut self) {
+        std::fs::remove_dir_all(&self.path).unwrap();
+    }
+}
+
+impl From<&TestPath> for PathBuf {
+    fn from(test_path: &TestPath) -> Self {
+        test_path.path.clone()
+    }
+}
+
 impl TestPath {
-    pub fn new(count: u32, folder_name: &str) -> Self {
-        let rng = thread_rng();
+    pub fn new(hits_count: u32, folder_name: &str) -> Self {
         let mut test_path = TestPath::generate_parent();
 
-        for _ in 1..count {
-            let name: String = rng.sample_iter(&Alphanumeric).take(16).collect();
+        test_path.generate_hits(hits_count, folder_name);
+        test_path.generate_no_hits();
+        test_path.generate_opposite(folder_name);
+        test_path.generate_partial(folder_name);
 
-            let path = test_path
+        test_path
+    }
+
+    pub fn generate_hits(&mut self, hits_count: u32, folder_name: &str) {
+        for _ in 0..hits_count {
+            let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+
+            let path = self
                 .path
                 .join(Path::new(&name))
                 .join(Path::new(folder_name));
 
             std::fs::create_dir_all(&path).unwrap();
 
-            test_path.hits.push(path);
+            self.hits.push(path);
         }
+    }
 
-        for _ in 1..count {
-            let name: String = rng.sample_iter(&Alphanumeric).take(16).collect();
+    pub fn generate_no_hits(&mut self) {
+        for _ in 0..5 {
+            let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
 
-            let path = test_path.path.join(Path::new(&name));
+            let path = self.path.join(Path::new(&name));
 
             std::fs::create_dir_all(&path).unwrap();
 
-            test_path.misses.push(path);
+            self.misses.push(path);
         }
+    }
 
-        test_path
+    pub fn generate_opposite(&mut self, folder_name: &str) {
+        let opposite = if matches!(&folder_name, &"node_modules") {
+            "target"
+        } else {
+            "node_modules"
+        };
+
+        let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+
+        let path = self.path.join(Path::new(&name)).join(Path::new(opposite));
+
+        std::fs::create_dir_all(&path).unwrap();
+
+        self.misses.push(path);
+    }
+
+    pub fn generate_partial(&mut self, folder_name: &str) {
+        let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+        let name_inner: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+        let name_inner = format!("{}_{}", folder_name, name_inner);
+
+        let path = self
+            .path
+            .join(Path::new(&name))
+            .join(Path::new(&name_inner));
+
+        std::fs::create_dir_all(&path).unwrap();
+
+        self.misses.push(path);
     }
 
     pub fn generate_parent() -> Self {
@@ -52,21 +104,10 @@ impl TestPath {
         std::fs::create_dir_all(&path).unwrap();
 
         TestPath {
+            rng,
             path,
             hits: Vec::new(),
             misses: Vec::new(),
         }
-    }
-}
-
-impl Drop for TestPath {
-    fn drop(&mut self) {
-        std::fs::remove_dir_all(&self.path).unwrap();
-    }
-}
-
-impl From<&TestPath> for PathBuf {
-    fn from(test_path: &TestPath) -> Self {
-        test_path.path.clone()
     }
 }

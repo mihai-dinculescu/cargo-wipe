@@ -69,8 +69,9 @@ fn write_header<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Resul
 fn write_content<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Result<DirInfo> {
     let folders_to_delete = get_folders(&params.path, &params.folder_name)?;
 
-    let mut file_count = 0_u64;
-    let mut size = 0_u64;
+    let dir_count = &folders_to_delete.len();
+    let mut file_count = 0_usize;
+    let mut size = 0_usize;
 
     for folder in folders_to_delete {
         let dir_info = dir_size(&folder)?;
@@ -94,7 +95,11 @@ fn write_content<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Resu
         size += dir_info.size;
     }
 
-    Ok(DirInfo { file_count, size })
+    Ok(DirInfo {
+        dir_count: *dir_count,
+        file_count,
+        size,
+    })
 }
 
 fn write_footer<W: Write>(
@@ -119,7 +124,7 @@ fn write_footer<W: Write>(
     stdout.flush()?;
 
     writeln!(stdout)?;
-    if total.file_count > 0 {
+    if total.dir_count > 0 {
         if !params.wipe {
             writeln!(
                 stdout,
