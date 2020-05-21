@@ -10,11 +10,18 @@ on:
 
 jobs:
   checks:
+    name: Checks
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
-      - name: Build
+      - name: Run check
+        run: cargo check --verbose
+      - name: Run fmt
+        run: cargo fmt --verbose -- --check
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features --verbose -- -D warnings
+      - name: Run build
         run: cargo build --verbose
-      - name: Run tests
+      - name: Run test
         run: cargo test --verbose

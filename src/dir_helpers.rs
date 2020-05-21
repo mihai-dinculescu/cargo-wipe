@@ -12,14 +12,12 @@ impl DirInfo {
     }
 
     pub fn file_count_formatted(&self) -> String {
-        let num: String = self.file_count.to_formatted_string(&Locale::en);
-        num
+        self.file_count.to_formatted_string(&Locale::en)
     }
 
     pub fn size_formatted(&self) -> String {
         let num = self.size / 1024_u64.pow(2);
-        let num = num.to_formatted_string(&Locale::en);
-        num
+        num.to_formatted_string(&Locale::en)
     }
 }
 

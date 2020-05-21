@@ -1,9 +1,8 @@
-
-use std::{path::PathBuf, io::Write};
+use std::{io::Write, path::PathBuf};
 use yansi::Paint;
 
-use crate::opts::{Args, FolderNameEnum};
 use crate::dir_helpers::{dir_size, get_folders, DirInfo};
+use crate::opts::{Args, FolderNameEnum};
 
 #[derive(Debug, PartialEq)]
 pub struct WipeParams {
@@ -51,7 +50,7 @@ fn write_header<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Resul
         Paint::yellow(params.path.display()),
     )?;
 
-    writeln!(stdout, "")?;
+    writeln!(stdout)?;
 
     writeln!(
         stdout,
@@ -98,8 +97,12 @@ fn write_content<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Resu
     Ok(DirInfo { file_count, size })
 }
 
-fn write_footer<W: Write>(stdout: &mut W, params: &WipeParams, total: &DirInfo) -> std::io::Result<()> {
-    writeln!(stdout, "")?;
+fn write_footer<W: Write>(
+    stdout: &mut W,
+    params: &WipeParams,
+    total: &DirInfo,
+) -> std::io::Result<()> {
+    writeln!(stdout)?;
     writeln!(
         stdout,
         r#"{:>18}{:>18}"#,
@@ -112,10 +115,10 @@ fn write_footer<W: Write>(stdout: &mut W, params: &WipeParams, total: &DirInfo) 
         Paint::default(total.file_count_formatted()),
         Paint::default(total.size_formatted())
     )?;
-        
+
     stdout.flush()?;
 
-    writeln!(stdout, "")?;
+    writeln!(stdout)?;
     if total.file_count > 0 {
         if !params.wipe {
             writeln!(
@@ -125,7 +128,7 @@ fn write_footer<W: Write>(stdout: &mut W, params: &WipeParams, total: &DirInfo) 
                 Paint::red("USE WITH CAUTION!")
             )?;
             if params.folder_name == "target" {
-                writeln!(stdout, 
+                writeln!(stdout,
                     "{} In its current form, this will remove {}, irrespective of if they are Rust folders or not!",
                     Paint::red("Warning!"),
                     Paint::red(r#"all folders named "target""#).underline()
@@ -137,7 +140,7 @@ fn write_footer<W: Write>(stdout: &mut W, params: &WipeParams, total: &DirInfo) 
     } else {
         writeln!(stdout, "{}", Paint::green("Nothing found!"))?
     }
-        
+
     stdout.flush()?;
 
     Ok(())
