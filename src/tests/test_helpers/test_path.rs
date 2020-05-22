@@ -31,6 +31,7 @@ impl TestPath {
         test_path.generate_hits(hits_count, folder_name);
         test_path.generate_no_hits();
         test_path.generate_opposite(folder_name);
+        test_path.generate_invalid(folder_name);
         test_path.generate_partial(folder_name);
 
         test_path
@@ -46,6 +47,11 @@ impl TestPath {
                 .join(Path::new(&folder_name.to_string()));
 
             std::fs::create_dir_all(&path).unwrap();
+
+            if folder_name == &FolderNameEnum::Target {
+                let file_path = path.join(".rustc_info.json");
+                std::fs::File::create(file_path).unwrap();
+            }
 
             self.hits.push(path);
         }
@@ -77,6 +83,21 @@ impl TestPath {
         std::fs::create_dir_all(&path).unwrap();
 
         self.misses.push(path);
+    }
+
+    pub fn generate_invalid(&mut self, folder_name: &FolderNameEnum) {
+        if folder_name == &FolderNameEnum::Target {
+            let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+
+            let path = self
+                .path
+                .join(Path::new(&name))
+                .join(Path::new(&folder_name.to_string()));
+
+            std::fs::create_dir_all(&path).unwrap();
+
+            self.misses.push(path);
+        }
     }
 
     pub fn generate_partial(&mut self, folder_name: &FolderNameEnum) {

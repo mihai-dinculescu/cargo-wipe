@@ -5,6 +5,9 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- Validation that checks if `target` folders are indeed Rust folders
+
 ### Fixed
 - Fix message when empty directories are found
 

@@ -127,13 +127,6 @@ fn write_footer<W: Write>(
                 Paint::red(format!("cargo wipe {} -w", params.folder_name.to_string())),
                 Paint::red("USE WITH CAUTION!")
             )?;
-            if params.folder_name == FolderNameEnum::Target {
-                writeln!(stdout,
-                    "{} In its current form, this will remove {}, irrespective of if they are Rust folders or not!",
-                    Paint::red("Warning!"),
-                    Paint::red(r#"all folders named "target""#).underline()
-                )?;
-            }
         } else {
             writeln!(stdout, "{}", Paint::green("All clear!"))?
         }

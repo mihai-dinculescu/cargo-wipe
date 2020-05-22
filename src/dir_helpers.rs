@@ -28,6 +28,15 @@ impl DirInfo {
     }
 }
 
+fn is_valid_target(path: PathBuf, folder_name: &FolderNameEnum) -> bool {
+    if folder_name == &FolderNameEnum::Target {
+        let file_path = path.join(".rustc_info.json");
+        return file_path.exists();
+    }
+
+    true
+}
+
 pub fn get_folders(
     path: impl Into<PathBuf>,
     folder_name: &FolderNameEnum,
@@ -42,7 +51,9 @@ pub fn get_folders(
             let size = match file.metadata()? {
                 data if data.is_dir() => {
                     if file.file_name() == folder_name.to_string()[..] {
-                        acc.push(file.path().display().to_string());
+                        if is_valid_target(file.path(), &folder_name) {
+                            acc.push(file.path().display().to_string());
+                        }
                         acc
                     } else {
                         acc.append(&mut walk(std::fs::read_dir(file.path())?, folder_name)?);
