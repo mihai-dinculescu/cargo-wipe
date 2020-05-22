@@ -1,40 +1,46 @@
 use parameterized::parameterized;
 
-use crate::opts::{Args, FolderNameEnum, Opts};
+use crate::opts::{Args, FolderNameEnum, Opts, SubcommandEnum};
 use crate::wipe::{get_params, WipeParams};
 
-#[parameterized(folder_name = {
-    FolderNameEnum::Node(Opts { wipe: false }), FolderNameEnum::NodeModules(Opts { wipe: false }),
-    FolderNameEnum::Node(Opts { wipe: true }), FolderNameEnum::NodeModules(Opts { wipe: true })
-}, wipe = { false, false, true, true })]
-fn node(folder_name: FolderNameEnum, wipe: bool) {
-    let args = Args { folder_name };
+#[parameterized(
+    subcommand = {
+        SubcommandEnum::Node(Opts { wipe: false }), SubcommandEnum::NodeModules(Opts { wipe: false }),
+        SubcommandEnum::Node(Opts { wipe: true }), SubcommandEnum::NodeModules(Opts { wipe: true }),
+    },
+    wipe = { false, false, true, true },
+)]
+fn node(subcommand: SubcommandEnum, wipe: bool) {
+    let args = Args { subcommand };
 
     let params = get_params(&args).unwrap();
 
     assert_eq!(
         params,
         WipeParams {
-            folder_name: "node_modules".to_owned(),
+            folder_name: FolderNameEnum::NodeModules,
             path: std::env::current_dir().unwrap(),
             wipe,
         }
     );
 }
 
-#[parameterized(folder_name = {
-    FolderNameEnum::Rust(Opts { wipe: false }), FolderNameEnum::Target(Opts { wipe: false }),
-    FolderNameEnum::Rust(Opts { wipe: true }), FolderNameEnum::Target(Opts { wipe: true })
-}, wipe = { false, false, true, true })]
-fn rust(folder_name: FolderNameEnum, wipe: bool) {
-    let args = Args { folder_name };
+#[parameterized(
+    subcommand = {
+        SubcommandEnum::Rust(Opts { wipe: false }), SubcommandEnum::Target(Opts { wipe: false }),
+        SubcommandEnum::Rust(Opts { wipe: true }), SubcommandEnum::Target(Opts { wipe: true }),
+    },
+    wipe = { false, false, true, true },
+)]
+fn rust(subcommand: SubcommandEnum, wipe: bool) {
+    let args = Args { subcommand };
 
     let params = get_params(&args).unwrap();
 
     assert_eq!(
         params,
         WipeParams {
-            folder_name: "target".to_owned(),
+            folder_name: FolderNameEnum::Target,
             path: std::env::current_dir().unwrap(),
             wipe,
         }

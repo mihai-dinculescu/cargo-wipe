@@ -1,6 +1,8 @@
 use num_format::{Locale, ToFormattedString};
 use std::path::PathBuf;
 
+use crate::opts::FolderNameEnum;
+
 pub struct DirInfo {
     pub dir_count: usize,
     pub file_count: usize,
@@ -26,14 +28,20 @@ impl DirInfo {
     }
 }
 
-pub fn get_folders(path: impl Into<PathBuf>, folder_name: &str) -> std::io::Result<Vec<String>> {
-    fn walk(mut dir: std::fs::ReadDir, folder_name: &str) -> std::io::Result<Vec<String>> {
+pub fn get_folders(
+    path: impl Into<PathBuf>,
+    folder_name: &FolderNameEnum,
+) -> std::io::Result<Vec<String>> {
+    fn walk(
+        mut dir: std::fs::ReadDir,
+        folder_name: &FolderNameEnum,
+    ) -> std::io::Result<Vec<String>> {
         dir.try_fold(Vec::new(), |mut acc: Vec<String>, file| {
             let file = file?;
 
             let size = match file.metadata()? {
                 data if data.is_dir() => {
-                    if file.file_name() == folder_name {
+                    if file.file_name() == folder_name.to_string()[..] {
                         acc.push(file.path().display().to_string());
                         acc
                     } else {

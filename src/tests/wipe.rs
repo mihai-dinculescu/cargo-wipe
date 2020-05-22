@@ -2,15 +2,22 @@ use parameterized::parameterized;
 use std::{io::Cursor, path::PathBuf};
 use yansi::Paint;
 
+use crate::opts::FolderNameEnum;
 use crate::tests::test_helpers::test_path::TestPath;
 use crate::wipe::{wipe_folders, WipeParams};
 
-#[parameterized(folder_name = { "node_modules", "node_modules", "target", "target" }, wipe = { false, true, false, true })]
-fn wipe_with_hits(folder_name: &str, wipe: bool) {
-    let test_path = TestPath::new(3, folder_name);
+#[parameterized(
+    folder_name = {
+        FolderNameEnum::NodeModules, FolderNameEnum::NodeModules,
+        FolderNameEnum::Target, FolderNameEnum::Target,
+    },
+    wipe = { false, true, false, true },
+)]
+fn wipe_with_hits(folder_name: FolderNameEnum, wipe: bool) {
+    let test_path = TestPath::new(3, &folder_name);
 
     let params = WipeParams {
-        folder_name: folder_name.to_owned(),
+        folder_name: folder_name.clone(),
         path: PathBuf::from(&test_path),
         wipe,
     };
@@ -26,7 +33,7 @@ fn wipe_with_hits(folder_name: &str, wipe: bool) {
     let expected = format!("{}", Paint::red("[WIPING]").bold());
     assert_eq!(output.contains(&expected), wipe);
 
-    let expected = format!(r#""{}""#, Paint::yellow(folder_name));
+    let expected = format!(r#""{}""#, Paint::yellow(folder_name.to_string()));
     assert!(output.contains(&expected));
 
     // hits should be listed and wiped if wipe is true
@@ -49,19 +56,25 @@ fn wipe_with_hits(folder_name: &str, wipe: bool) {
     } else {
         let expected = format!(
             "Run {} to wipe all folders found. {}",
-            Paint::red(format!("cargo wipe {} -w", params.folder_name)),
+            Paint::red(format!("cargo wipe {} -w", params.folder_name.to_string())),
             Paint::red("USE WITH CAUTION!")
         );
         assert!(output.contains(&expected));
     }
 }
 
-#[parameterized(folder_name = { "node_modules", "node_modules", "target", "target" }, wipe = { false, true, false, true })]
-fn wipe_no_hits(folder_name: &str, wipe: bool) {
-    let test_path = TestPath::new(0, folder_name);
+#[parameterized(
+    folder_name = {
+        FolderNameEnum::NodeModules, FolderNameEnum::NodeModules,
+        FolderNameEnum::Target, FolderNameEnum::Target,
+    },
+    wipe = { false, true, false, true },
+)]
+fn wipe_no_hits(folder_name: FolderNameEnum, wipe: bool) {
+    let test_path = TestPath::new(0, &folder_name);
 
     let params = WipeParams {
-        folder_name: folder_name.to_owned(),
+        folder_name,
         path: PathBuf::from(&test_path),
         wipe,
     };

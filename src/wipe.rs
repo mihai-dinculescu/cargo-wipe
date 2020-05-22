@@ -2,27 +2,22 @@ use std::{io::Write, path::PathBuf};
 use yansi::Paint;
 
 use crate::dir_helpers::{dir_size, get_folders, DirInfo};
-use crate::opts::{Args, FolderNameEnum};
+use crate::opts::{Args, FolderNameEnum, ParsedSubcommand};
 
 #[derive(Debug, PartialEq)]
 pub struct WipeParams {
     pub wipe: bool,
     pub path: PathBuf,
-    pub folder_name: String,
+    pub folder_name: FolderNameEnum,
 }
 
 pub fn get_params(args: &Args) -> std::io::Result<WipeParams> {
     let path = std::env::current_dir()?;
 
-    let (folder_name, wipe) = match &args.folder_name {
-        FolderNameEnum::Node(opts) => ("node_modules", opts.wipe),
-        FolderNameEnum::NodeModules(opts) => ("node_modules", opts.wipe),
-        FolderNameEnum::Rust(opts) => ("target", opts.wipe),
-        FolderNameEnum::Target(opts) => ("target", opts.wipe),
-    };
+    let ParsedSubcommand { folder_name, wipe } = From::from(&args.subcommand);
 
     Ok(WipeParams {
-        folder_name: folder_name.to_owned(),
+        folder_name,
         path,
         wipe,
     })
@@ -46,7 +41,7 @@ fn write_header<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Resul
     writeln!(
         stdout,
         r#" Recursively searching for all "{}" folders in {} ..."#,
-        Paint::yellow(&params.folder_name),
+        Paint::yellow(&params.folder_name.to_string()),
         Paint::yellow(params.path.display()),
     )?;
 
@@ -129,10 +124,10 @@ fn write_footer<W: Write>(
             writeln!(
                 stdout,
                 "Run {} to wipe all folders found. {}",
-                Paint::red(format!("cargo wipe {} -w", params.folder_name)),
+                Paint::red(format!("cargo wipe {} -w", params.folder_name.to_string())),
                 Paint::red("USE WITH CAUTION!")
             )?;
-            if params.folder_name == "target" {
+            if params.folder_name == FolderNameEnum::Target {
                 writeln!(stdout,
                     "{} In its current form, this will remove {}, irrespective of if they are Rust folders or not!",
                     Paint::red("Warning!"),
