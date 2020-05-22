@@ -1,4 +1,6 @@
 use num_format::{Locale, ToFormattedString};
+use std::fs;
+use std::io;
 use std::path::PathBuf;
 
 use crate::opts::FolderNameEnum;
@@ -37,45 +39,51 @@ fn is_valid_target(path: PathBuf, folder_name: &FolderNameEnum) -> bool {
     true
 }
 
-pub fn get_folders(
-    path: impl Into<PathBuf>,
-    folder_name: &FolderNameEnum,
-) -> std::io::Result<Vec<String>> {
-    fn walk(
-        mut dir: std::fs::ReadDir,
-        folder_name: &FolderNameEnum,
-    ) -> std::io::Result<Vec<String>> {
-        dir.try_fold(Vec::new(), |mut acc: Vec<String>, file| {
-            let file = file?;
+pub type PathsResult = io::Result<Vec<Result<String, io::Error>>>;
 
-            let size = match file.metadata()? {
-                data if data.is_dir() => {
-                    if file.file_name() == folder_name.to_string()[..] {
-                        if is_valid_target(file.path(), &folder_name) {
-                            acc.push(file.path().display().to_string());
+pub fn get_paths_to_delete(path: impl Into<PathBuf>, folder_name: &FolderNameEnum) -> PathsResult {
+    fn walk(dir: io::Result<fs::ReadDir>, folder_name: &FolderNameEnum) -> PathsResult {
+        let mut dir = match dir {
+            Ok(dir) => dir,
+            Err(e) => {
+                return Ok(vec![Err(e)]);
+            }
+        };
+
+        dir.try_fold(
+            Vec::new(),
+            |mut acc: Vec<Result<String, io::Error>>, file| {
+                let file = file?;
+
+                let size = match file.metadata()? {
+                    data if data.is_dir() => {
+                        if file.file_name() == folder_name.to_string()[..] {
+                            if is_valid_target(file.path(), &folder_name) {
+                                acc.push(Ok(file.path().display().to_string()));
+                            }
+                            acc
+                        } else {
+                            acc.append(&mut walk(fs::read_dir(file.path()), folder_name)?);
+                            acc
                         }
-                        acc
-                    } else {
-                        acc.append(&mut walk(std::fs::read_dir(file.path())?, folder_name)?);
-                        acc
                     }
-                }
-                _ => acc,
-            };
+                    _ => acc,
+                };
 
-            Ok(size)
-        })
+                Ok(size)
+            },
+        )
     }
 
-    walk(std::fs::read_dir(path.into())?, folder_name)
+    walk(fs::read_dir(path.into()), folder_name)
 }
 
-pub fn dir_size(path: impl Into<PathBuf>) -> std::io::Result<DirInfo> {
-    fn walk(mut dir: std::fs::ReadDir) -> std::io::Result<DirInfo> {
+pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {
+    fn walk(mut dir: fs::ReadDir) -> io::Result<DirInfo> {
         dir.try_fold(DirInfo::new(0, 0, 0), |acc, file| {
             let file = file?;
             let size = match file.metadata()? {
-                data if data.is_dir() => walk(std::fs::read_dir(file.path())?)?,
+                data if data.is_dir() => walk(fs::read_dir(file.path())?)?,
                 data => DirInfo::new(1, 1, data.len() as usize),
             };
 
@@ -87,5 +95,5 @@ pub fn dir_size(path: impl Into<PathBuf>) -> std::io::Result<DirInfo> {
         })
     }
 
-    walk(std::fs::read_dir(path.into())?)
+    walk(fs::read_dir(path.into())?)
 }

@@ -9,6 +9,7 @@ file. This change log follows the conventions of
 - Validation that checks if `target` folders are indeed Rust folders
 
 ### Fixed
+- Fix crash caused by dirs without read permissions
 - Fix message when empty directories are found
 
 ## [0.1.3] - 2020-05-21

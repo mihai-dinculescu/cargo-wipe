@@ -1,7 +1,10 @@
-use std::{io::Write, path::PathBuf};
+use std::env;
+use std::fs;
+use std::io;
+use std::path::PathBuf;
 use yansi::Paint;
 
-use crate::dir_helpers::{dir_size, get_folders, DirInfo};
+use crate::dir_helpers::{dir_size, get_paths_to_delete, DirInfo};
 use crate::opts::{Args, FolderNameEnum, ParsedSubcommand};
 
 #[derive(Debug, PartialEq)]
@@ -11,8 +14,8 @@ pub struct WipeParams {
     pub folder_name: FolderNameEnum,
 }
 
-pub fn get_params(args: &Args) -> std::io::Result<WipeParams> {
-    let path = std::env::current_dir()?;
+pub fn get_params(args: &Args) -> io::Result<WipeParams> {
+    let path = env::current_dir()?;
 
     let ParsedSubcommand { folder_name, wipe } = From::from(&args.subcommand);
 
@@ -23,7 +26,7 @@ pub fn get_params(args: &Args) -> std::io::Result<WipeParams> {
     })
 }
 
-pub fn wipe_folders<W: Write>(mut stdout: &mut W, params: &WipeParams) -> std::io::Result<()> {
+pub fn wipe_folders<W: io::Write>(mut stdout: &mut W, params: &WipeParams) -> io::Result<()> {
     write_header(&mut stdout, &params)?;
     let total = write_content(&mut stdout, &params)?;
     write_footer(&mut stdout, &params, &total)?;
@@ -31,7 +34,7 @@ pub fn wipe_folders<W: Write>(mut stdout: &mut W, params: &WipeParams) -> std::i
     Ok(())
 }
 
-fn write_header<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Result<()> {
+fn write_header<W: io::Write>(stdout: &mut W, params: &WipeParams) -> io::Result<()> {
     if params.wipe {
         write!(stdout, "{}", Paint::red("[WIPING]").bold())?;
     } else {
@@ -61,33 +64,35 @@ fn write_header<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Resul
     Ok(())
 }
 
-fn write_content<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Result<DirInfo> {
-    let folders_to_delete = get_folders(&params.path, &params.folder_name)?;
+fn write_content<W: io::Write>(stdout: &mut W, params: &WipeParams) -> io::Result<DirInfo> {
+    let paths_to_delete = get_paths_to_delete(&params.path, &params.folder_name)?;
 
-    let dir_count = &folders_to_delete.len();
+    let dir_count = &paths_to_delete.len();
     let mut file_count = 0_usize;
     let mut size = 0_usize;
 
-    for folder in folders_to_delete {
-        let dir_info = dir_size(&folder)?;
+    for path in paths_to_delete {
+        if let Ok(path) = path {
+            let dir_info = dir_size(&path)?;
 
-        writeln!(
-            stdout,
-            r#"{:>18}{:>18}{:>9}{}"#,
-            dir_info.file_count_formatted(),
-            dir_info.size_formatted(),
-            "",
-            &folder
-        )?;
+            writeln!(
+                stdout,
+                r#"{:>18}{:>18}{:>9}{}"#,
+                dir_info.file_count_formatted(),
+                dir_info.size_formatted(),
+                "",
+                &path
+            )?;
 
-        if params.wipe {
-            std::fs::remove_dir_all(folder)?;
+            if params.wipe {
+                fs::remove_dir_all(path)?;
+            }
+
+            stdout.flush()?;
+
+            file_count += dir_info.file_count;
+            size += dir_info.size;
         }
-
-        stdout.flush()?;
-
-        file_count += dir_info.file_count;
-        size += dir_info.size;
     }
 
     Ok(DirInfo {
@@ -97,11 +102,11 @@ fn write_content<W: Write>(stdout: &mut W, params: &WipeParams) -> std::io::Resu
     })
 }
 
-fn write_footer<W: Write>(
+fn write_footer<W: io::Write>(
     stdout: &mut W,
     params: &WipeParams,
     total: &DirInfo,
-) -> std::io::Result<()> {
+) -> io::Result<()> {
     writeln!(stdout)?;
     writeln!(
         stdout,
