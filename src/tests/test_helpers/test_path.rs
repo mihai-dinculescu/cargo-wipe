@@ -119,9 +119,8 @@ impl TestPath {
         let rng = thread_rng();
         let name: String = rng.sample_iter(&Alphanumeric).take(16).collect();
 
-        let path = std::env::current_dir()
-            .unwrap()
-            .join(Path::new(".mocks"))
+        let path = std::env::temp_dir()
+            .join(Path::new(".cargo-wipe-tests"))
             .join(Path::new(&name));
 
         std::fs::create_dir_all(&path).unwrap();
