@@ -6,7 +6,7 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
-## [0.2.0] - 2020-05-24
+## [v0.2.0] - 2020-05-24
 ### Added
 - Validation that checks if `target` folders are indeed Rust folders
 - Gracefully handle access denied errors
@@ -15,24 +15,25 @@ file. This change log follows the conventions of
 - Fix crash caused by dirs without read permissions
 - Fix message when empty directories are found
 
-## [0.1.3] - 2020-05-21
+## [v0.1.3] - 2020-05-21
 ### Changed
 - Internal improvements
 
-## [0.1.2] - 2020-05-16
+## [v0.1.2] - 2020-05-16
 ### Fixed
 - Fix wipe instructions
 
-## [0.1.1] - 2020-05-16
+## [v0.1.1] - 2020-05-16
 ### Added
 - Add extra warning for wiping `target` folders
 - Add `node_modules` and `target` as valid subcommands
 
-## [0.1.0] - 2020-05-16
+## [v0.1.0] - 2020-05-16
 ### Initial Release of cargo-wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
-[0.1.3]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.3
-[0.1.2]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.2
-[0.1.1]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.1
-[0.1.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.0
+[v0.2.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.2.0
+[v0.1.3]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.3
+[v0.1.2]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.2
+[v0.1.1]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.1
+[v0.1.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.0
