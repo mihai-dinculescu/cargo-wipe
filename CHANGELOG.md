@@ -5,6 +5,8 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [0.2.0] - 2020-05-24
 ### Added
 - Validation that checks if `target` folders are indeed Rust folders
 - Gracefully handle access denied errors
