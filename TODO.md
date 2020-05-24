@@ -1,6 +1,5 @@
 # TODO
 - Add `-w` to the root help section
-- Handle access denied errors on wipe
 - Show total space made available in GB, when it makes sense (https://crates.io/crates/number_prefix)
 - Show before and after path size
 - Show the actual dir size on disk

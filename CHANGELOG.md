@@ -7,6 +7,7 @@ file. This change log follows the conventions of
 ## [Unreleased]
 ### Added
 - Validation that checks if `target` folders are indeed Rust folders
+- Gracefully handle access denied errors
 
 ### Fixed
 - Fix crash caused by dirs without read permissions

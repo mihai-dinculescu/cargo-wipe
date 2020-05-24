@@ -73,25 +73,35 @@ fn write_content<W: io::Write>(stdout: &mut W, params: &WipeParams) -> io::Resul
 
     for path in paths_to_delete {
         if let Ok(path) = path {
-            let dir_info = dir_size(&path)?;
+            let dir_info = dir_size(&path);
 
-            writeln!(
-                stdout,
-                r#"{:>18}{:>18}{:>9}{}"#,
-                dir_info.file_count_formatted(),
-                dir_info.size_formatted(),
-                "",
-                &path
-            )?;
+            if let Ok(dir_info) = dir_info {
+                write!(
+                    stdout,
+                    r#"{:>18}{:>18}{:>9}{}"#,
+                    dir_info.file_count_formatted(),
+                    dir_info.size_formatted(),
+                    "",
+                    &path
+                )?;
 
-            if params.wipe {
-                fs::remove_dir_all(path)?;
+                file_count += dir_info.file_count;
+                size += dir_info.size;
+            } else {
+                write!(stdout, r#"{:>18}{:>18}{:>9}{}"#, "?", "?", "", &path)?;
             }
 
-            stdout.flush()?;
+            if params.wipe {
+                let r = fs::remove_dir_all(path);
 
-            file_count += dir_info.file_count;
-            size += dir_info.size;
+                if let Err(e) = r {
+                    write!(stdout, " {}", Paint::red(e))?;
+                }
+            }
+
+            writeln!(stdout)?;
+
+            stdout.flush()?;
         }
     }
 
