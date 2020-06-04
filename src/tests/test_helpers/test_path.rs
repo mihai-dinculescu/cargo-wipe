@@ -103,7 +103,7 @@ impl TestPath {
     pub fn generate_partial(&mut self, folder_name: &FolderNameEnum) {
         let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
         let name_inner: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
-        let name_inner = format!("{}_{}", folder_name.to_string(), name_inner);
+        let name_inner = format!("{}_{}", folder_name, name_inner);
 
         let path = self
             .path

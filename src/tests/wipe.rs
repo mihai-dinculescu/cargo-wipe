@@ -35,7 +35,7 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     let expected = format!("{}", Paint::red("[WIPING]").bold());
     assert_eq!(output.contains(&expected), wipe);
 
-    let expected = format!(r#""{}""#, Paint::yellow(folder_name.to_string()));
+    let expected = format!(r#""{}""#, Paint::yellow(folder_name));
     assert!(output.contains(&expected));
 
     // hits should be listed and wiped if wipe is true
@@ -58,7 +58,7 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     } else {
         let expected = format!(
             "Run {} to wipe all folders found. {}",
-            Paint::red(format!("cargo wipe {} -w", params.folder_name.to_string())),
+            Paint::red(format!("cargo wipe {} -w", params.folder_name)),
             Paint::red("USE WITH CAUTION!")
         );
         assert!(output.contains(&expected));

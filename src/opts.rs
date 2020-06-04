@@ -1,3 +1,4 @@
+use std::fmt;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -39,11 +40,11 @@ pub enum FolderNameEnum {
     Target,
 }
 
-impl ToString for FolderNameEnum {
-    fn to_string(&self) -> String {
+impl fmt::Display for FolderNameEnum {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FolderNameEnum::NodeModules => String::from("node_modules"),
-            FolderNameEnum::Target => String::from("target"),
+            FolderNameEnum::NodeModules => write!(f, "node_modules"),
+            FolderNameEnum::Target => write!(f, "target"),
         }
     }
 }

@@ -44,7 +44,7 @@ fn write_header<W: io::Write>(stdout: &mut W, params: &WipeParams) -> io::Result
     writeln!(
         stdout,
         r#" Recursively searching for all "{}" folders in {} ..."#,
-        Paint::yellow(&params.folder_name.to_string()),
+        Paint::yellow(&params.folder_name),
         Paint::yellow(params.path.display()),
     )?;
 
@@ -139,7 +139,7 @@ fn write_footer<W: io::Write>(
             writeln!(
                 stdout,
                 "Run {} to wipe all folders found. {}",
-                Paint::red(format!("cargo wipe {} -w", params.folder_name.to_string())),
+                Paint::red(format!("cargo wipe {} -w", params.folder_name)),
                 Paint::red("USE WITH CAUTION!")
             )?;
         } else {
