@@ -6,7 +6,7 @@ use std::io::Cursor;
 use std::path::PathBuf;
 
 #[cfg(target_os = "linux")]
-use crate::opts::FolderNameEnum;
+use crate::command::FolderNameEnum;
 #[cfg(target_os = "linux")]
 use crate::tests::test_helpers::test_path::TestPath;
 #[cfg(target_os = "linux")]

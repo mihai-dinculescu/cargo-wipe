@@ -1,18 +1,17 @@
 use parameterized::parameterized;
 
-use crate::opts::{Args, FolderNameEnum, Opts, SubcommandEnum};
+use crate::command::{Args, FolderNameEnum};
 use crate::wipe::{get_params, WipeParams};
 
 #[parameterized(
-    subcommand = {
-        SubcommandEnum::Node(Opts { wipe: false }), SubcommandEnum::NodeModules(Opts { wipe: false }),
-        SubcommandEnum::Node(Opts { wipe: true }), SubcommandEnum::NodeModules(Opts { wipe: true }),
+    args = {
+        Args { folder_name: FolderNameEnum::Node, wipe: false },
+        Args { folder_name: FolderNameEnum::Node, wipe: true },
+        Args { folder_name: FolderNameEnum::NodeModules, wipe: false },
+        Args { folder_name: FolderNameEnum::NodeModules, wipe: true },
     },
-    wipe = { false, false, true, true },
 )]
-fn node(subcommand: SubcommandEnum, wipe: bool) {
-    let args = Args { subcommand };
-
+fn node(args: Args) {
     let params = get_params(&args).unwrap();
 
     assert_eq!(
@@ -20,21 +19,20 @@ fn node(subcommand: SubcommandEnum, wipe: bool) {
         WipeParams {
             folder_name: FolderNameEnum::NodeModules,
             path: std::env::current_dir().unwrap(),
-            wipe,
+            wipe: args.wipe,
         }
     );
 }
 
 #[parameterized(
-    subcommand = {
-        SubcommandEnum::Rust(Opts { wipe: false }), SubcommandEnum::Target(Opts { wipe: false }),
-        SubcommandEnum::Rust(Opts { wipe: true }), SubcommandEnum::Target(Opts { wipe: true }),
+    args = {
+        Args { folder_name: FolderNameEnum::Rust, wipe: false },
+        Args { folder_name: FolderNameEnum::Rust, wipe: true },
+        Args { folder_name: FolderNameEnum::Target, wipe: false },
+        Args { folder_name: FolderNameEnum::Target, wipe: true },
     },
-    wipe = { false, false, true, true },
 )]
-fn rust(subcommand: SubcommandEnum, wipe: bool) {
-    let args = Args { subcommand };
-
+fn rust(args: Args) {
     let params = get_params(&args).unwrap();
 
     assert_eq!(
@@ -42,7 +40,7 @@ fn rust(subcommand: SubcommandEnum, wipe: bool) {
         WipeParams {
             folder_name: FolderNameEnum::Target,
             path: std::env::current_dir().unwrap(),
-            wipe,
+            wipe: args.wipe,
         }
     );
 }

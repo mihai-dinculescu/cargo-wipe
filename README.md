@@ -15,13 +15,13 @@ cargo install cargo-wipe
 ```
 cargo wipe target
 ```
-Add `-w` to wipe all folders found. USE WITH CAUTION!
+Add the `-w` flag to wipe all Rust `target` folders found. USE WITH CAUTION!
 
 ## node_modules
 ```
 cargo wipe node_modules
 ```
-Add `-w` to wipe all folders found. USE WITH CAUTION!
+Add the `-w` flag to wipe all `node_modules` folders found. USE WITH CAUTION!
 
 ## Usage Example
 ![Usage Example Screenshot](https://github.com/mihai-dinculescu/cargo-wipe/blob/master/assets/screenshot.PNG "Usage Example")

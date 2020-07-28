@@ -3,7 +3,7 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 
-use crate::opts::FolderNameEnum;
+use crate::command::FolderNameEnum;
 
 pub struct DirInfo {
     pub dir_count: usize,

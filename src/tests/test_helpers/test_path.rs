@@ -2,7 +2,7 @@ use rand::distributions::Alphanumeric;
 use rand::{prelude::ThreadRng, thread_rng, Rng};
 use std::path::{Path, PathBuf};
 
-use crate::opts::FolderNameEnum;
+use crate::command::FolderNameEnum;
 
 #[derive(Debug)]
 pub struct TestPath {

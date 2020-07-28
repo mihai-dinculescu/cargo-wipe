@@ -4,8 +4,8 @@ use std::io;
 use std::path::PathBuf;
 use yansi::Paint;
 
+use crate::command::{Args, FolderNameEnum};
 use crate::dir_helpers::{dir_size, get_paths_to_delete, DirInfo};
-use crate::opts::{Args, FolderNameEnum, ParsedSubcommand};
 
 #[derive(Debug, PartialEq)]
 pub struct WipeParams {
@@ -17,12 +17,13 @@ pub struct WipeParams {
 pub fn get_params(args: &Args) -> io::Result<WipeParams> {
     let path = env::current_dir()?;
 
-    let ParsedSubcommand { folder_name, wipe } = From::from(&args.subcommand);
-
     Ok(WipeParams {
-        folder_name,
+        folder_name: match args.folder_name {
+            FolderNameEnum::Node | FolderNameEnum::NodeModules => FolderNameEnum::NodeModules,
+            FolderNameEnum::Rust | FolderNameEnum::Target => FolderNameEnum::Target,
+        },
         path,
-        wipe,
+        wipe: args.wipe,
     })
 }
 

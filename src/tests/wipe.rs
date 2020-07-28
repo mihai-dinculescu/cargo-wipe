@@ -3,7 +3,7 @@ use std::io::Cursor;
 use std::path::PathBuf;
 use yansi::Paint;
 
-use crate::opts::FolderNameEnum;
+use crate::command::FolderNameEnum;
 use crate::tests::test_helpers::test_path::TestPath;
 use crate::wipe::{wipe_folders, WipeParams};
 

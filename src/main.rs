@@ -1,11 +1,11 @@
 use std::io::stdout;
 use structopt::StructOpt;
 
+pub mod command;
 pub mod dir_helpers;
-pub mod opts;
 pub mod wipe;
 
-use crate::opts::Command;
+use crate::command::Command;
 use crate::wipe::{get_params, wipe_folders};
 
 #[cfg(test)]

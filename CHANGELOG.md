@@ -5,15 +5,26 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+### Added
+- The `-w` flag can now be used both before and after the folder name argument
+
+### Changed
+- The folder name is now an argument instead of a subcommand
+
+### Fixed
+- The `-w` flag now shows up in the root help section
 
 ## [v0.2.0] - 2020-05-24
 ### Added
 - Validation that checks if `target` folders are indeed Rust folders
-- Gracefully handle access denied errors
+
+### Removed
+- Extra warning for wiping `target` folders
 
 ### Fixed
-- Fix crash caused by dirs without read permissions
-- Fix message when empty directories are found
+- Access denied errors are now handled gracefully
+- Fixed a crash caused by dirs without read permissions
+- Fixed the message displayed when empty directories are found
 
 ## [v0.1.3] - 2020-05-21
 ### Changed
@@ -25,8 +36,8 @@ file. This change log follows the conventions of
 
 ## [v0.1.1] - 2020-05-16
 ### Added
-- Add extra warning for wiping `target` folders
-- Add `node_modules` and `target` as valid subcommands
+- Extra warning for wiping `target` folders
+- `node_modules` and `target` subcommands
 
 ## [v0.1.0] - 2020-05-16
 ### Initial Release of cargo-wipe
