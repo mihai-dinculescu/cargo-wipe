@@ -1,7 +1,7 @@
 use num_format::{Locale, ToFormattedString};
-use std::fs;
-use std::io;
+use number_prefix::NumberPrefix;
 use std::path::PathBuf;
+use std::{fs, io};
 
 use crate::command::FolderNameEnum;
 
@@ -24,9 +24,18 @@ impl DirInfo {
         self.file_count.to_formatted_string(&Locale::en)
     }
 
-    pub fn size_formatted(&self) -> String {
+    pub fn size_formatted_mb(&self) -> String {
         let num = self.size / 1024_usize.pow(2);
         num.to_formatted_string(&Locale::en)
+    }
+
+    pub fn size_formatted_flex(&self) -> String {
+        let np = NumberPrefix::binary(self.size as f64);
+
+        match np {
+            NumberPrefix::Prefixed(prefix, n) => format!("{:.2} {}B", n, prefix),
+            NumberPrefix::Standalone(bytes) => format!("{} bytes", bytes),
+        }
     }
 }
 
@@ -96,4 +105,24 @@ pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {
     }
 
     walk(fs::read_dir(path.into())?)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use parameterized::parameterized;
+
+    #[parameterized(
+        size = { 0, 512, 1024, 1024_usize.pow(2), 1024_usize.pow(3), 1024_usize.pow(4) },
+        output = { "0 bytes", "512 bytes", "1.00 KiB", "1.00 MiB", "1.00 GiB", "1.00 TiB" },
+    )]
+    fn size_formatted_flex(size: usize, output: &str) {
+        let di = DirInfo {
+            dir_count: 0,
+            file_count: 0,
+            size,
+        };
+
+        assert_eq!(di.size_formatted_flex(), output);
+    }
 }

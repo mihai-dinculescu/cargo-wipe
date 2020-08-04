@@ -5,10 +5,9 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
-### Added
-- The `-w` flag can now be used both before and after the folder name argument
-
 ### Changed
+- Total space (that can be) made available is now shown in an appropriate unit (bytes, KiB, MiB, GiB, etc.)
+- The `-w` flag can now be used both before and after the folder name argument
 - The folder name is now an argument instead of a subcommand
 
 ### Fixed

@@ -81,7 +81,7 @@ fn write_content<W: io::Write>(stdout: &mut W, params: &WipeParams) -> io::Resul
                     stdout,
                     r#"{:>18}{:>18}{:>9}{}"#,
                     dir_info.file_count_formatted(),
-                    dir_info.size_formatted(),
+                    dir_info.size_formatted_mb(),
                     "",
                     &path
                 )?;
@@ -123,13 +123,13 @@ fn write_footer<W: io::Write>(
         stdout,
         r#"{:>18}{:>18}"#,
         Paint::default("Total Files #").bold(),
-        Paint::default("Total Size (MB)").bold()
+        Paint::default("Total Size").bold()
     )?;
     writeln!(
         stdout,
         r#"{:>18}{:>18}"#,
         Paint::default(total.file_count_formatted()),
-        Paint::default(total.size_formatted())
+        Paint::default(total.size_formatted_flex())
     )?;
 
     stdout.flush()?;
