@@ -14,143 +14,168 @@ pub struct WipeParams {
     pub folder_name: FolderNameEnum,
 }
 
-pub fn get_params(args: &Args) -> io::Result<WipeParams> {
-    let path = env::current_dir()?;
+impl WipeParams {
+    pub fn new(args: &Args) -> io::Result<Self> {
+        let path = env::current_dir()?;
 
-    Ok(WipeParams {
-        folder_name: match args.folder_name {
-            FolderNameEnum::Node | FolderNameEnum::NodeModules => FolderNameEnum::NodeModules,
-            FolderNameEnum::Rust | FolderNameEnum::Target => FolderNameEnum::Target,
-        },
-        path,
-        wipe: args.wipe,
-    })
-}
-
-pub fn wipe_folders<W: io::Write>(mut stdout: &mut W, params: &WipeParams) -> io::Result<()> {
-    write_header(&mut stdout, &params)?;
-    let total = write_content(&mut stdout, &params)?;
-    write_footer(&mut stdout, &params, &total)?;
-
-    Ok(())
-}
-
-fn write_header<W: io::Write>(stdout: &mut W, params: &WipeParams) -> io::Result<()> {
-    if params.wipe {
-        write!(stdout, "{}", Paint::red("[WIPING]").bold())?;
-    } else {
-        write!(stdout, "{}", Paint::green("[DRY RUN]").bold())?;
+        Ok(Self {
+            folder_name: match args.folder_name {
+                FolderNameEnum::Node | FolderNameEnum::NodeModules => FolderNameEnum::NodeModules,
+                FolderNameEnum::Rust | FolderNameEnum::Target => FolderNameEnum::Target,
+            },
+            path,
+            wipe: args.wipe,
+        })
     }
-
-    writeln!(
-        stdout,
-        r#" Recursively searching for all "{}" folders in {} ..."#,
-        Paint::yellow(&params.folder_name),
-        Paint::yellow(params.path.display()),
-    )?;
-
-    writeln!(stdout)?;
-
-    writeln!(
-        stdout,
-        r#"{:>18}{:>18}{:>9}{}"#,
-        Paint::default("Files #").bold(),
-        Paint::default("Size (MB)").bold(),
-        "",
-        Paint::default("Path").bold()
-    )?;
-
-    stdout.flush()?;
-
-    Ok(())
 }
 
-fn write_content<W: io::Write>(stdout: &mut W, params: &WipeParams) -> io::Result<DirInfo> {
-    let paths_to_delete = get_paths_to_delete(&params.path, &params.folder_name)?;
+#[derive(Debug)]
+pub struct Wipe<'a, W>
+where
+    W: io::Write,
+{
+    stdout: &'a mut W,
+    params: &'a WipeParams,
+    total: Option<DirInfo>,
+}
 
-    let dir_count = &paths_to_delete.len();
-    let mut file_count = 0_usize;
-    let mut size = 0_usize;
-
-    for path in paths_to_delete {
-        if let Ok(path) = path {
-            let dir_info = dir_size(&path);
-
-            if let Ok(dir_info) = dir_info {
-                write!(
-                    stdout,
-                    r#"{:>18}{:>18}{:>9}{}"#,
-                    dir_info.file_count_formatted(),
-                    dir_info.size_formatted_mb(),
-                    "",
-                    &path
-                )?;
-
-                file_count += dir_info.file_count;
-                size += dir_info.size;
-            } else {
-                write!(stdout, r#"{:>18}{:>18}{:>9}{}"#, "?", "?", "", &path)?;
-            }
-
-            if params.wipe {
-                let r = fs::remove_dir_all(path);
-
-                if let Err(e) = r {
-                    write!(stdout, " {}", Paint::red(e))?;
-                }
-            }
-
-            writeln!(stdout)?;
-
-            stdout.flush()?;
+impl<'a, W> Wipe<'a, W>
+where
+    W: io::Write,
+{
+    pub fn new(stdout: &'a mut W, params: &'a WipeParams) -> Self {
+        Self {
+            stdout,
+            params,
+            total: None,
         }
     }
 
-    Ok(DirInfo {
-        dir_count: *dir_count,
-        file_count,
-        size,
-    })
-}
+    pub fn run(&mut self) -> io::Result<()> {
+        self.write_header()?;
+        self.write_content()?;
+        self.write_footer()?;
 
-fn write_footer<W: io::Write>(
-    stdout: &mut W,
-    params: &WipeParams,
-    total: &DirInfo,
-) -> io::Result<()> {
-    writeln!(stdout)?;
-    writeln!(
-        stdout,
-        r#"{:>18}{:>18}"#,
-        Paint::default("Total Files #").bold(),
-        Paint::default("Total Size").bold()
-    )?;
-    writeln!(
-        stdout,
-        r#"{:>18}{:>18}"#,
-        Paint::default(total.file_count_formatted()),
-        Paint::default(total.size_formatted_flex())
-    )?;
+        Ok(())
+    }
 
-    stdout.flush()?;
-
-    writeln!(stdout)?;
-    if total.dir_count > 0 {
-        if !params.wipe {
-            writeln!(
-                stdout,
-                "Run {} to wipe all folders found. {}",
-                Paint::red(format!("cargo wipe {} -w", params.folder_name)),
-                Paint::red("USE WITH CAUTION!")
-            )?;
+    fn write_header(&mut self) -> io::Result<()> {
+        if self.params.wipe {
+            write!(self.stdout, "{}", Paint::red("[WIPING]").bold())?;
         } else {
-            writeln!(stdout, "{}", Paint::green("All clear!"))?
+            write!(self.stdout, "{}", Paint::green("[DRY RUN]").bold())?;
         }
-    } else {
-        writeln!(stdout, "{}", Paint::green("Nothing found!"))?
+
+        writeln!(
+            self.stdout,
+            r#" Recursively searching for all "{}" folders in {} ..."#,
+            Paint::yellow(&self.params.folder_name),
+            Paint::yellow(self.params.path.display()),
+        )?;
+
+        writeln!(self.stdout)?;
+
+        writeln!(
+            self.stdout,
+            r#"{:>18}{:>18}{:>9}{}"#,
+            Paint::default("Files #").bold(),
+            Paint::default("Size (MB)").bold(),
+            "",
+            Paint::default("Path").bold()
+        )?;
+
+        self.stdout.flush()?;
+
+        Ok(())
     }
 
-    stdout.flush()?;
+    fn write_content(&mut self) -> io::Result<()> {
+        let paths_to_delete = get_paths_to_delete(&self.params.path, &self.params.folder_name)?;
 
-    Ok(())
+        let dir_count = &paths_to_delete.len();
+        let mut file_count = 0_usize;
+        let mut size = 0_usize;
+
+        for path in paths_to_delete {
+            if let Ok(path) = path {
+                let dir_info = dir_size(&path);
+
+                if let Ok(dir_info) = dir_info {
+                    write!(
+                        self.stdout,
+                        r#"{:>18}{:>18}{:>9}{}"#,
+                        dir_info.file_count_formatted(),
+                        dir_info.size_formatted_mb(),
+                        "",
+                        &path
+                    )?;
+
+                    file_count += dir_info.file_count;
+                    size += dir_info.size;
+                } else {
+                    write!(self.stdout, r#"{:>18}{:>18}{:>9}{}"#, "?", "?", "", &path)?;
+                }
+
+                if self.params.wipe {
+                    let r = fs::remove_dir_all(path);
+
+                    if let Err(e) = r {
+                        write!(self.stdout, " {}", Paint::red(e))?;
+                    }
+                }
+
+                writeln!(self.stdout)?;
+
+                self.stdout.flush()?;
+            }
+        }
+
+        self.total = Some(DirInfo {
+            dir_count: *dir_count,
+            file_count,
+            size,
+        });
+
+        Ok(())
+    }
+
+    fn write_footer(&mut self) -> io::Result<()> {
+        let total = self.total.as_ref().expect("this should never be None");
+
+        writeln!(self.stdout)?;
+        writeln!(
+            self.stdout,
+            r#"{:>18}{:>18}"#,
+            Paint::default("Total Files #").bold(),
+            Paint::default("Total Size").bold()
+        )?;
+        writeln!(
+            self.stdout,
+            r#"{:>18}{:>18}"#,
+            Paint::default(total.file_count_formatted()),
+            Paint::default(total.size_formatted_flex())
+        )?;
+
+        self.stdout.flush()?;
+
+        writeln!(self.stdout)?;
+        if total.dir_count > 0 {
+            if !self.params.wipe {
+                writeln!(
+                    self.stdout,
+                    "Run {} to wipe all folders found. {}",
+                    Paint::red(format!("cargo wipe {} -w", self.params.folder_name)),
+                    Paint::red("USE WITH CAUTION!")
+                )?;
+            } else {
+                writeln!(self.stdout, "{}", Paint::green("All clear!"))?
+            }
+        } else {
+            writeln!(self.stdout, "{}", Paint::green("Nothing found!"))?
+        }
+
+        self.stdout.flush()?;
+
+        Ok(())
+    }
 }

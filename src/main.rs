@@ -6,7 +6,7 @@ pub mod dir_helpers;
 pub mod wipe;
 
 use crate::command::Command;
-use crate::wipe::{get_params, wipe_folders};
+use crate::wipe::{Wipe, WipeParams};
 
 #[cfg(test)]
 mod tests;
@@ -17,8 +17,8 @@ fn main() -> anyhow::Result<()> {
 
     match command {
         Command::Wipe(args) => {
-            let params = get_params(&args)?;
-            wipe_folders(&mut stdout, &params)?;
+            let params = WipeParams::new(&args)?;
+            Wipe::new(&mut stdout, &params).run()?;
         }
     }
 

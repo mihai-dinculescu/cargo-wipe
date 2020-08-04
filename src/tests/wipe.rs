@@ -5,7 +5,7 @@ use yansi::Paint;
 
 use crate::command::FolderNameEnum;
 use crate::tests::test_helpers::test_path::TestPath;
-use crate::wipe::{wipe_folders, WipeParams};
+use crate::wipe::{Wipe, WipeParams};
 
 #[parameterized(
     folder_name = {
@@ -24,7 +24,8 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     };
 
     let mut buff = Cursor::new(Vec::new());
-    wipe_folders(&mut buff, &params).unwrap();
+    Wipe::new(&mut buff, &params).run().unwrap();
+
     let output = std::str::from_utf8(&buff.get_ref()).unwrap();
     println!("{}", output);
 
@@ -82,7 +83,8 @@ fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
     };
 
     let mut buff = Cursor::new(Vec::new());
-    wipe_folders(&mut buff, &params).unwrap();
+    Wipe::new(&mut buff, &params).run().unwrap();
+
     let output = std::str::from_utf8(&buff.get_ref()).unwrap();
     println!("{}", output);
 

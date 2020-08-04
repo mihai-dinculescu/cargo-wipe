@@ -5,6 +5,7 @@ use std::{fs, io};
 
 use crate::command::FolderNameEnum;
 
+#[derive(Debug)]
 pub struct DirInfo {
     pub dir_count: usize,
     pub file_count: usize,
