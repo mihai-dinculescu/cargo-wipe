@@ -28,3 +28,9 @@ jobs:
         run: cargo make clippy
       - name: Run test
         run: cargo make test
+      - name: Generate code coverage
+        run: cargo make coverage
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
