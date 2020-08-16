@@ -11,13 +11,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: master
-      - name: Run check
-        run: cargo check --verbose
-      - name: Run build
-        run: cargo build --release --verbose
       - name: Run cargo login
         run: cargo login ${CRATES_IO_TOKEN}
         env:
           CRATES_IO_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+      - name: Run build
+        run: cargo build --release --verbose
       - name: Run cargo publish
         run: cargo publish
