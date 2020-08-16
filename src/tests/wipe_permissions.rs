@@ -5,7 +5,7 @@ mod wipe_permissions_tests {
     use std::path::PathBuf;
 
     use crate::command::FolderNameEnum;
-    use crate::tests::test_helpers::test_path::TestPath;
+    use crate::tests::helpers::path::TestPath;
     use crate::wipe::{Wipe, WipeParams};
 
     #[parameterized(

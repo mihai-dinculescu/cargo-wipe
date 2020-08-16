@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use yansi::Paint;
 
 use crate::command::FolderNameEnum;
-use crate::tests::test_helpers::test_path::TestPath;
+use crate::tests::helpers::path::TestPath;
 use crate::wipe::{Wipe, WipeParams};
 
 #[parameterized(
