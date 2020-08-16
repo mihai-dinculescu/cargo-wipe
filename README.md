@@ -1,11 +1,15 @@
 # Cargo Wipe
-[![Crates][crates_badge]][crates]\
+[![Crates][crates_badge]][crates]
+[![CI][ci_badge]][ci]
+[![codecov][codecov_badge]][codecov]
+[![license][license_badge]][license]
+[![Crates.io][crates_installs_badge]][crates]\
 Cargo subcommand that recursively finds and optionally wipes all "target" or "node_modules" folders that are found in the current path.
 
 # Usage
 
 ## Install
-The [Rust toolchain](https://rustup.rs) is a prerequisite.
+The [Rust toolchain][toolchain] is a prerequisite.
 
 ```
 cargo install cargo-wipe
@@ -24,10 +28,21 @@ cargo wipe node_modules
 Add the `-w` flag to wipe all `node_modules` folders found. USE WITH CAUTION!
 
 ## Usage Example
-![Usage Example Screenshot](https://github.com/mihai-dinculescu/cargo-wipe/blob/master/assets/screenshot.PNG "Usage Example")
+![Usage Example Screenshot][usage_example]
 
 # Contributions
-Contributions are welcome and encouraged! See [TODO.md](TODO.md) for ideas, or suggest your own!
+Contributions are welcome and encouraged! See [TODO.md][todo] for ideas, or suggest your own!
 
 [crates_badge]: https://img.shields.io/crates/v/cargo-wipe.svg
 [crates]: https://crates.io/crates/cargo-wipe
+[ci_badge]: https://github.com/mihai-dinculescu/cargo-wipe/workflows/CI/badge.svg?branch=master
+[ci]: https://github.com/mihai-dinculescu/cargo-wipe/actions
+[codecov_badge]: https://codecov.io/gh/mihai-dinculescu/cargo-wipe/branch/master/graph/badge.svg
+[codecov]: https://codecov.io/gh/mihai-dinculescu/cargo-wipe
+[license_badge]: https://img.shields.io/crates/l/cargo-wipe.svg
+[license]: https://github.com/mihai-dinculescu/cargo-wipe/blob/master/LICENSE
+[crates_installs_badge]: https://img.shields.io/crates/d/cargo-wipe?label=cargo%20installs
+
+[toolchain]: https://rustup.rs
+[usage_example]: https://github.com/mihai-dinculescu/cargo-wipe/blob/master/assets/screenshot.PNG
+[todo]: TODO.md
