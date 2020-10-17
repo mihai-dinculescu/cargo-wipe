@@ -5,6 +5,8 @@ file. This change log follows the conventions of
 [keepachangelog.com](http://keepachangelog.com/).
 
 ## [Unreleased]
+
+## [v0.3.0] - 2020-10-17
 ### Added
 - Before and after path disk size is now shown
 
@@ -45,6 +47,7 @@ file. This change log follows the conventions of
 ### Initial Release of cargo-wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
+[v0.3.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.0
 [v0.2.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.2.0
 [v0.1.3]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.3
 [v0.1.2]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.2

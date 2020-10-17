@@ -33,6 +33,27 @@ Add the `-w` flag to wipe all `node_modules` folders found. USE WITH CAUTION!
 # Contributions
 Contributions are welcome and encouraged! See [TODO.md][todo] for ideas, or suggest your own!
 
+## PR Checks
+
+```bash
+    cargo make ci-flow
+```
+
+## Releases
+
+- Update version in `Cargo.toml`
+- Commit
+- Add tag
+    ```bash
+    git tag -a vX.X.X
+    ```
+- Push
+    ```bash
+    git push --follow-tags
+    ```
+- Release
+Create a new release at https://github.com/mihai-dinculescu/cargo-wipe/releases. `publish.yml` GitHub Action will pick it up and do the actual release to https://crates.io/.
+
 [crates_badge]: https://img.shields.io/crates/v/cargo-wipe.svg
 [crates]: https://crates.io/crates/cargo-wipe
 [ci_badge]: https://github.com/mihai-dinculescu/cargo-wipe/workflows/CI/badge.svg?branch=master
