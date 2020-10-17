@@ -51,8 +51,9 @@ Contributions are welcome and encouraged! See [TODO.md][todo] for ideas, or sugg
     ```bash
     git push --follow-tags
     ```
-- Release
-Create a new release at https://github.com/mihai-dinculescu/cargo-wipe/releases. `publish.yml` GitHub Action will pick it up and do the actual release to https://crates.io/.
+- Release\
+Create a [new release](https://github.com/mihai-dinculescu/cargo-wipe/releases). \
+`publish.yml` GitHub Action will pick it up and do the actual release to https://crates.io/.
 
 [crates_badge]: https://img.shields.io/crates/v/cargo-wipe.svg
 [crates]: https://crates.io/crates/cargo-wipe
