@@ -5,7 +5,7 @@ use std::{fs, io};
 
 use crate::command::FolderNameEnum;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub struct DirInfo {
     pub dir_count: usize,
     pub file_count: usize,
@@ -89,12 +89,21 @@ pub fn get_paths_to_delete(path: impl Into<PathBuf>, folder_name: &FolderNameEnu
 }
 
 pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {
-    fn walk(mut dir: fs::ReadDir) -> io::Result<DirInfo> {
+    fn walk(dir: io::Result<fs::ReadDir>) -> io::Result<DirInfo> {
+        let mut dir = match dir {
+            Ok(dir) => dir,
+            Err(_) => {
+                return Ok(DirInfo::new(0, 0, 0));
+            }
+        };
+
         dir.try_fold(DirInfo::new(0, 0, 0), |acc, file| {
             let file = file?;
-            let size = match file.metadata()? {
-                data if data.is_dir() => walk(fs::read_dir(file.path())?)?,
-                data => DirInfo::new(1, 1, data.len() as usize),
+
+            let size = match file.metadata() {
+                Ok(data) if data.is_dir() => walk(fs::read_dir(file.path()))?,
+                Ok(data) => DirInfo::new(1, 1, data.len() as usize),
+                _ => DirInfo::new(0, 0, 0),
             };
 
             Ok(DirInfo::new(
@@ -105,7 +114,7 @@ pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {
         })
     }
 
-    walk(fs::read_dir(path.into())?)
+    walk(fs::read_dir(path.into()))
 }
 
 #[cfg(test)]

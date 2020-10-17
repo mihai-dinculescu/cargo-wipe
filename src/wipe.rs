@@ -1,11 +1,15 @@
-use std::env;
 use std::fs;
 use std::io;
 use std::path::PathBuf;
+use std::{env, fmt::Display};
 use yansi::Paint;
 
 use crate::command::{Args, FolderNameEnum};
 use crate::dir_helpers::{dir_size, get_paths_to_delete, DirInfo};
+
+pub const SPACING_FILES: usize = 12;
+pub const SPACING_SIZE: usize = 18;
+pub const SPACING_PATH: usize = 9;
 
 #[derive(Debug, PartialEq)]
 pub struct WipeParams {
@@ -36,7 +40,8 @@ where
 {
     stdout: &'a mut W,
     params: &'a WipeParams,
-    total: Option<DirInfo>,
+    previous_info: Option<DirInfo>,
+    wipe_info: Option<DirInfo>,
 }
 
 impl<'a, W> Wipe<'a, W>
@@ -47,7 +52,8 @@ where
         Self {
             stdout,
             params,
-            total: None,
+            previous_info: None,
+            wipe_info: None,
         }
     }
 
@@ -68,20 +74,9 @@ where
 
         writeln!(
             self.stdout,
-            r#" Recursively searching for all "{}" folders in {} ..."#,
-            Paint::yellow(&self.params.folder_name),
-            Paint::yellow(self.params.path.display()),
-        )?;
-
-        writeln!(self.stdout)?;
-
-        writeln!(
-            self.stdout,
-            r#"{:>18}{:>18}{:>9}{}"#,
-            Paint::default("Files #").bold(),
-            Paint::default("Size (MB)").bold(),
-            "",
-            Paint::default("Path").bold()
+            r#" Recursively searching for all "{}" folders in {}..."#,
+            Paint::cyan(&self.params.folder_name),
+            Paint::cyan(self.params.path.display()),
         )?;
 
         self.stdout.flush()?;
@@ -91,75 +86,74 @@ where
 
     fn write_content(&mut self) -> io::Result<()> {
         let paths_to_delete = get_paths_to_delete(&self.params.path, &self.params.folder_name)?;
+        let paths_to_delete = paths_to_delete
+            .iter()
+            .filter_map(|p| match p {
+                Ok(item) => Some(item),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+
+        if !paths_to_delete.is_empty() {
+            writeln!(self.stdout)?;
+
+            self.writeln_spaced_line(
+                Paint::cyan("Files #"),
+                Paint::cyan("Size (MB)"),
+                "",
+                Paint::cyan("Path"),
+            )?;
+
+            self.previous_info = Some(dir_size(&self.params.path)?);
+        }
 
         let dir_count = &paths_to_delete.len();
         let mut file_count = 0_usize;
         let mut size = 0_usize;
 
         for path in paths_to_delete {
-            if let Ok(path) = path {
-                let dir_info = dir_size(&path);
+            let dir_info = dir_size(&path);
 
-                if let Ok(dir_info) = dir_info {
-                    write!(
-                        self.stdout,
-                        r#"{:>18}{:>18}{:>9}{}"#,
-                        dir_info.file_count_formatted(),
-                        dir_info.size_formatted_mb(),
-                        "",
-                        &path
-                    )?;
+            if let Ok(dir_info) = dir_info {
+                self.write_spaced_line(
+                    dir_info.file_count_formatted(),
+                    dir_info.size_formatted_mb(),
+                    "",
+                    &path,
+                )?;
 
-                    file_count += dir_info.file_count;
-                    size += dir_info.size;
-                } else {
-                    write!(self.stdout, r#"{:>18}{:>18}{:>9}{}"#, "?", "?", "", &path)?;
-                }
-
-                if self.params.wipe {
-                    let r = fs::remove_dir_all(path);
-
-                    if let Err(e) = r {
-                        write!(self.stdout, " {}", Paint::red(e))?;
-                    }
-                }
-
-                writeln!(self.stdout)?;
-
-                self.stdout.flush()?;
+                file_count += dir_info.file_count;
+                size += dir_info.size;
+            } else {
+                self.write_spaced_line("?", "?", "", &path)?;
             }
+
+            if self.params.wipe {
+                let r = fs::remove_dir_all(path);
+
+                if let Err(e) = r {
+                    write!(self.stdout, " {}", Paint::red(e))?;
+                }
+            }
+
+            writeln!(self.stdout)?;
+
+            self.stdout.flush()?;
         }
 
-        self.total = Some(DirInfo {
-            dir_count: *dir_count,
-            file_count,
-            size,
-        });
+        self.wipe_info = Some(DirInfo::new(*dir_count, file_count, size));
 
         Ok(())
     }
 
     fn write_footer(&mut self) -> io::Result<()> {
-        let total = self.total.as_ref().expect("this should never be None");
+        let wipe_info = self.wipe_info.as_ref().expect("this should never be None");
 
         writeln!(self.stdout)?;
-        writeln!(
-            self.stdout,
-            r#"{:>18}{:>18}"#,
-            Paint::default("Total Files #").bold(),
-            Paint::default("Total Size").bold()
-        )?;
-        writeln!(
-            self.stdout,
-            r#"{:>18}{:>18}"#,
-            Paint::default(total.file_count_formatted()),
-            Paint::default(total.size_formatted_flex())
-        )?;
 
-        self.stdout.flush()?;
+        if wipe_info.dir_count > 0 {
+            self.write_summary()?;
 
-        writeln!(self.stdout)?;
-        if total.dir_count > 0 {
             if !self.params.wipe {
                 writeln!(
                     self.stdout,
@@ -175,6 +169,113 @@ where
         }
 
         self.stdout.flush()?;
+
+        Ok(())
+    }
+
+    fn write_summary(&mut self) -> io::Result<()> {
+        let wipe_info = self.wipe_info.expect("this should never be None");
+        let previous_info = self.previous_info.expect("this should never be None");
+
+        let after = DirInfo {
+            dir_count: previous_info.dir_count - wipe_info.dir_count,
+            file_count: previous_info.file_count - wipe_info.file_count,
+            size: previous_info.size - wipe_info.size,
+        };
+
+        self.writeln_spaced_line(
+            Paint::cyan("Files #"),
+            Paint::cyan("Size"),
+            "",
+            Paint::cyan(self.params.path.display()),
+        )?;
+
+        let label = if self.params.wipe {
+            "Previously"
+        } else {
+            "Currently"
+        };
+
+        self.writeln_spaced_line(
+            Paint::default(previous_info.file_count_formatted()),
+            Paint::default(previous_info.size_formatted_flex()),
+            "",
+            Paint::default(label),
+        )?;
+
+        let label = if self.params.wipe {
+            "Wiped"
+        } else {
+            "Can wipe"
+        };
+
+        self.writeln_spaced_line(
+            Paint::red(wipe_info.file_count_formatted()),
+            Paint::red(wipe_info.size_formatted_flex()),
+            "",
+            Paint::red(label),
+        )?;
+
+        let label = if self.params.wipe {
+            "Now"
+        } else {
+            "After wipe"
+        };
+
+        self.writeln_spaced_line(
+            Paint::green(after.file_count_formatted()),
+            Paint::green(after.size_formatted_flex()),
+            "",
+            Paint::green(label),
+        )?;
+
+        writeln!(self.stdout)?;
+
+        self.stdout.flush()?;
+
+        Ok(())
+    }
+
+    fn write_spaced_line(
+        &mut self,
+        column_1: impl Display,
+        column_2: impl Display,
+        column_3: impl Display,
+        column_4: impl Display,
+    ) -> io::Result<()> {
+        write!(
+            self.stdout,
+            r#"{:>files$}{:>size$}{:>path$}{}"#,
+            column_1,
+            column_2,
+            column_3,
+            column_4,
+            files = SPACING_FILES,
+            size = SPACING_SIZE,
+            path = SPACING_PATH,
+        )?;
+
+        Ok(())
+    }
+
+    fn writeln_spaced_line(
+        &mut self,
+        column_1: impl Display,
+        column_2: impl Display,
+        column_3: impl Display,
+        column_4: impl Display,
+    ) -> io::Result<()> {
+        writeln!(
+            self.stdout,
+            r#"{:>files$}{:>size$}{:>path$}{}"#,
+            column_1,
+            column_2,
+            column_3,
+            column_4,
+            files = SPACING_FILES,
+            size = SPACING_SIZE,
+            path = SPACING_PATH,
+        )?;
 
         Ok(())
     }
