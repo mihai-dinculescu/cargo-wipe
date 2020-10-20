@@ -1,5 +1,6 @@
 use std::fs;
 use std::io;
+use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::{env, fmt::Display};
 use yansi::Paint;
@@ -40,8 +41,8 @@ where
 {
     stdout: &'a mut W,
     params: &'a WipeParams,
-    previous_info: Option<DirInfo>,
-    wipe_info: Option<DirInfo>,
+    previous_info: MaybeUninit<DirInfo>,
+    wipe_info: MaybeUninit<DirInfo>,
 }
 
 impl<'a, W> Wipe<'a, W>
@@ -52,8 +53,8 @@ where
         Self {
             stdout,
             params,
-            previous_info: None,
-            wipe_info: None,
+            previous_info: MaybeUninit::uninit(),
+            wipe_info: MaybeUninit::uninit(),
         }
     }
 
@@ -104,7 +105,7 @@ where
                 Paint::cyan("Path"),
             )?;
 
-            self.previous_info = Some(dir_size(&self.params.path)?);
+            self.previous_info = MaybeUninit::new(dir_size(&self.params.path)?);
         }
 
         let dir_count = &paths_to_delete.len();
@@ -141,13 +142,13 @@ where
             self.stdout.flush()?;
         }
 
-        self.wipe_info = Some(DirInfo::new(*dir_count, file_count, size));
+        self.wipe_info = MaybeUninit::new(DirInfo::new(*dir_count, file_count, size));
 
         Ok(())
     }
 
     fn write_footer(&mut self) -> io::Result<()> {
-        let wipe_info = self.wipe_info.as_ref().expect("this should never be None");
+        let wipe_info = unsafe { self.wipe_info.assume_init() };
 
         writeln!(self.stdout)?;
 
@@ -174,8 +175,12 @@ where
     }
 
     fn write_summary(&mut self) -> io::Result<()> {
-        let wipe_info = self.wipe_info.expect("this should never be None");
-        let previous_info = self.previous_info.expect("this should never be None");
+        let (wipe_info, previous_info) = unsafe {
+            (
+                self.wipe_info.assume_init(),
+                self.previous_info.assume_init(),
+            )
+        };
 
         let after = DirInfo {
             dir_count: previous_info.dir_count - wipe_info.dir_count,
