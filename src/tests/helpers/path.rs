@@ -39,7 +39,11 @@ impl TestPath {
 
     pub fn generate_hits(&mut self, hits_count: u32, folder_name: &FolderNameEnum) {
         for _ in 0..hits_count {
-            let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+            let name: String = (&mut self.rng)
+                .sample_iter(&Alphanumeric)
+                .take(16)
+                .map(char::from)
+                .collect();
 
             let path = self
                 .path
@@ -59,7 +63,11 @@ impl TestPath {
 
     pub fn generate_no_hits(&mut self) {
         for _ in 0..5 {
-            let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+            let name: String = (&mut self.rng)
+                .sample_iter(&Alphanumeric)
+                .take(16)
+                .map(char::from)
+                .collect();
 
             let path = self.path.join(Path::new(&name));
 
@@ -76,7 +84,11 @@ impl TestPath {
             "node_modules"
         };
 
-        let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+        let name: String = (&mut self.rng)
+            .sample_iter(&Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect();
 
         let path = self.path.join(Path::new(&name)).join(Path::new(opposite));
 
@@ -87,7 +99,11 @@ impl TestPath {
 
     pub fn generate_invalid(&mut self, folder_name: &FolderNameEnum) {
         if folder_name == &FolderNameEnum::Target {
-            let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+            let name: String = (&mut self.rng)
+                .sample_iter(&Alphanumeric)
+                .take(16)
+                .map(char::from)
+                .collect();
 
             let path = self
                 .path
@@ -101,8 +117,16 @@ impl TestPath {
     }
 
     pub fn generate_partial(&mut self, folder_name: &FolderNameEnum) {
-        let name: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
-        let name_inner: String = self.rng.sample_iter(&Alphanumeric).take(16).collect();
+        let name: String = (&mut self.rng)
+            .sample_iter(&Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect();
+        let name_inner: String = (&mut self.rng)
+            .sample_iter(&Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect();
         let name_inner = format!("{}_{}", folder_name, name_inner);
 
         let path = self
@@ -116,8 +140,12 @@ impl TestPath {
     }
 
     pub fn generate_parent() -> Self {
-        let rng = thread_rng();
-        let name: String = rng.sample_iter(&Alphanumeric).take(16).collect();
+        let mut rng = thread_rng();
+        let name: String = (&mut rng)
+            .sample_iter(&Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect();
 
         let path = std::env::temp_dir()
             .join(Path::new(".cargo-wipe-tests"))
