@@ -6,6 +6,8 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+## [v0.3.1] - 2021-01-11
+
 ### Added
 
 - Specific paths can now be ignored by using the `i` argument
@@ -66,6 +68,7 @@ file. This change log follows the conventions of
 ### Initial Release of cargo-wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
+[v0.3.1]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.1
 [v0.3.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.0
 [v0.2.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.2.0
 [v0.1.3]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.1.3
