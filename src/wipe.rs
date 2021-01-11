@@ -16,6 +16,7 @@ pub struct WipeParams {
     pub wipe: bool,
     pub path: PathBuf,
     pub folder_name: FolderNameEnum,
+    pub ignores: Vec<PathBuf>,
 }
 
 impl WipeParams {
@@ -23,12 +24,13 @@ impl WipeParams {
         let path = env::current_dir()?;
 
         Ok(Self {
+            wipe: args.wipe,
+            path,
             folder_name: match args.folder_name {
                 FolderNameEnum::Node | FolderNameEnum::NodeModules => FolderNameEnum::NodeModules,
                 FolderNameEnum::Rust | FolderNameEnum::Target => FolderNameEnum::Target,
             },
-            path,
-            wipe: args.wipe,
+            ignores: args.ignores.clone(),
         })
     }
 }
@@ -42,6 +44,7 @@ where
     params: &'a WipeParams,
     previous_info: Option<DirInfo>,
     wipe_info: Option<DirInfo>,
+    ignore_info: Option<DirInfo>,
 }
 
 impl<'a, W> Wipe<'a, W>
@@ -54,6 +57,7 @@ where
             params,
             previous_info: None,
             wipe_info: None,
+            ignore_info: None,
         }
     }
 
@@ -107,12 +111,21 @@ where
             self.previous_info = Some(dir_size(&self.params.path)?);
         }
 
-        let dir_count = &paths_to_delete.len();
-        let mut file_count = 0_usize;
-        let mut size = 0_usize;
+        let mut wipe_info = DirInfo::new(paths_to_delete.len(), 0, 0);
+        let mut ignore_info = DirInfo::new(0, 0, 0);
+        let paths_ignored = self
+            .params
+            .ignores
+            .iter()
+            .map(|p| p.display().to_string().to_lowercase())
+            .collect::<Vec<_>>();
 
         for path in paths_to_delete {
             let dir_info = dir_size(&path);
+
+            let ignored = paths_ignored
+                .iter()
+                .any(|p| path.to_lowercase().starts_with(p));
 
             if let Ok(dir_info) = dir_info {
                 self.write_spaced_line(
@@ -122,17 +135,25 @@ where
                     &path,
                 )?;
 
-                file_count += dir_info.file_count;
-                size += dir_info.size;
+                if ignored {
+                    ignore_info.dir_count += 1;
+                    ignore_info.file_count += dir_info.file_count;
+                    ignore_info.size += dir_info.size;
+                } else {
+                    wipe_info.file_count += dir_info.file_count;
+                    wipe_info.size += dir_info.size;
+                }
             } else {
                 self.write_spaced_line("?", "?", "", &path)?;
             }
 
-            if self.params.wipe {
+            if ignored {
+                write!(self.stdout, " {}", Paint::yellow("[Ignored]"))?;
+            } else if self.params.wipe {
                 let r = fs::remove_dir_all(path);
 
                 if let Err(e) = r {
-                    write!(self.stdout, " {}", Paint::red(e))?;
+                    write!(self.stdout, " {}", Paint::red(&format!("[{}]", e)))?;
                 }
             }
 
@@ -141,41 +162,16 @@ where
             self.stdout.flush()?;
         }
 
-        self.wipe_info = Some(DirInfo::new(*dir_count, file_count, size));
-
-        Ok(())
-    }
-
-    fn write_footer(&mut self) -> io::Result<()> {
-        let wipe_info = self.wipe_info.as_ref().expect("this should never be None");
-
-        writeln!(self.stdout)?;
-
-        if wipe_info.dir_count > 0 {
-            self.write_summary()?;
-
-            if !self.params.wipe {
-                writeln!(
-                    self.stdout,
-                    "Run {} to wipe all folders found. {}",
-                    Paint::red(format!("cargo wipe {} -w", self.params.folder_name)),
-                    Paint::red("USE WITH CAUTION!")
-                )?;
-            } else {
-                writeln!(self.stdout, "{}", Paint::green("All clear!"))?
-            }
-        } else {
-            writeln!(self.stdout, "{}", Paint::green("Nothing found!"))?
-        }
-
-        self.stdout.flush()?;
+        self.wipe_info = Some(wipe_info);
+        self.ignore_info = Some(ignore_info);
 
         Ok(())
     }
 
     fn write_summary(&mut self) -> io::Result<()> {
-        let wipe_info = self.wipe_info.expect("this should never be None");
         let previous_info = self.previous_info.expect("this should never be None");
+        let wipe_info = self.wipe_info.expect("this should never be None");
+        let ignore_info = self.ignore_info.expect("this should never be None");
 
         let after = DirInfo {
             dir_count: previous_info.dir_count - wipe_info.dir_count,
@@ -202,6 +198,15 @@ where
             "",
             Paint::default(label),
         )?;
+
+        if ignore_info.dir_count > 0 {
+            self.writeln_spaced_line(
+                Paint::yellow(ignore_info.file_count_formatted()),
+                Paint::yellow(ignore_info.size_formatted_flex()),
+                "",
+                Paint::yellow("Ignored"),
+            )?;
+        }
 
         let label = if self.params.wipe {
             "Wiped"
@@ -230,6 +235,33 @@ where
         )?;
 
         writeln!(self.stdout)?;
+
+        self.stdout.flush()?;
+
+        Ok(())
+    }
+
+    fn write_footer(&mut self) -> io::Result<()> {
+        let wipe_info = self.wipe_info.as_ref().expect("this should never be None");
+
+        writeln!(self.stdout)?;
+
+        if wipe_info.dir_count > 0 {
+            self.write_summary()?;
+
+            if !self.params.wipe {
+                writeln!(
+                    self.stdout,
+                    "Run {} to wipe all folders found. {}",
+                    Paint::red(format!("cargo wipe {} -w", self.params.folder_name)),
+                    Paint::red("USE WITH CAUTION!")
+                )?;
+            } else {
+                writeln!(self.stdout, "{}", Paint::green("All clear!"))?
+            }
+        } else {
+            writeln!(self.stdout, "{}", Paint::green("Nothing found!"))?
+        }
 
         self.stdout.flush()?;
 

@@ -5,10 +5,10 @@ use crate::wipe::WipeParams;
 
 #[parameterized(
     args = {
-        Args { folder_name: FolderNameEnum::Node, wipe: false },
-        Args { folder_name: FolderNameEnum::Node, wipe: true },
-        Args { folder_name: FolderNameEnum::NodeModules, wipe: false },
-        Args { folder_name: FolderNameEnum::NodeModules, wipe: true },
+        Args { wipe: false, folder_name: FolderNameEnum::Node, ignores: Vec::new(), },
+        Args { wipe: true, folder_name: FolderNameEnum::Node, ignores: Vec::new(),  },
+        Args { wipe: false, folder_name: FolderNameEnum::NodeModules, ignores: Vec::new(),  },
+        Args { wipe: true, folder_name: FolderNameEnum::NodeModules, ignores: Vec::new(),  },
     },
 )]
 fn node(args: Args) {
@@ -17,19 +17,20 @@ fn node(args: Args) {
     assert_eq!(
         params,
         WipeParams {
-            folder_name: FolderNameEnum::NodeModules,
-            path: std::env::current_dir().unwrap(),
             wipe: args.wipe,
+            path: std::env::current_dir().unwrap(),
+            folder_name: FolderNameEnum::NodeModules,
+            ignores: args.ignores,
         }
     );
 }
 
 #[parameterized(
     args = {
-        Args { folder_name: FolderNameEnum::Rust, wipe: false },
-        Args { folder_name: FolderNameEnum::Rust, wipe: true },
-        Args { folder_name: FolderNameEnum::Target, wipe: false },
-        Args { folder_name: FolderNameEnum::Target, wipe: true },
+        Args { wipe: false, folder_name: FolderNameEnum::Rust, ignores: Vec::new(), },
+        Args { wipe: true, folder_name: FolderNameEnum::Rust, ignores: Vec::new(),  },
+        Args { wipe: false, folder_name: FolderNameEnum::Target, ignores: Vec::new(),  },
+        Args { wipe: true, folder_name: FolderNameEnum::Target, ignores: Vec::new(),  },
     },
 )]
 fn rust(args: Args) {
@@ -38,9 +39,10 @@ fn rust(args: Args) {
     assert_eq!(
         params,
         WipeParams {
-            folder_name: FolderNameEnum::Target,
-            path: std::env::current_dir().unwrap(),
             wipe: args.wipe,
+            path: std::env::current_dir().unwrap(),
+            folder_name: FolderNameEnum::Target,
+            ignores: args.ignores,
         }
     );
 }

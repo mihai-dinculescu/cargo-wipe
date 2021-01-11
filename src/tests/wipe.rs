@@ -18,9 +18,10 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     let test_path = TestPath::new(3, &folder_name);
 
     let params = WipeParams {
-        folder_name: folder_name.clone(),
-        path: PathBuf::from(&test_path),
         wipe,
+        path: PathBuf::from(&test_path),
+        folder_name: folder_name.clone(),
+        ignores: Vec::new(),
     };
 
     let mut buff = Cursor::new(Vec::new());
@@ -94,9 +95,10 @@ fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
     let test_path = TestPath::new(0, &folder_name);
 
     let params = WipeParams {
-        folder_name,
-        path: PathBuf::from(&test_path),
         wipe,
+        path: PathBuf::from(&test_path),
+        folder_name: folder_name,
+        ignores: Vec::new(),
     };
 
     let mut buff = Cursor::new(Vec::new());
