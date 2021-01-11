@@ -6,6 +6,10 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+### Added
+
+- Specific paths can now be ignored by using the `i` argument
+
 ## [v0.3.0] - 2020-10-17
 
 ### Added

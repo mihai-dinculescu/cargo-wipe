@@ -16,7 +16,7 @@ pub struct Args {
     /// Caution! If set it will wipe all folders found! Unset by default
     #[structopt(short, long)]
     pub wipe: bool,
-    /// Paths to ignore
+    /// Absolute paths to ignore
     #[structopt(short, long, parse(from_os_str))]
     pub ignores: Vec<path::PathBuf>,
 }

@@ -17,13 +17,20 @@ The [Rust toolchain][toolchain] is a prerequisite.
 cargo install cargo-wipe
 ```
 
+## Documentation
+
+```
+cargo wipe --help
+```
+
 ## target
 
 ```
 cargo wipe target
 ```
 
-Add the `-w` flag to wipe all Rust `target` folders found. USE WITH CAUTION!
+- Use the `-i <path>` argument to ignore certain paths.
+- Add the `-w` flag to wipe all Rust `target` folders found. USE WITH CAUTION!
 
 ## node_modules
 
@@ -31,7 +38,8 @@ Add the `-w` flag to wipe all Rust `target` folders found. USE WITH CAUTION!
 cargo wipe node_modules
 ```
 
-Add the `-w` flag to wipe all `node_modules` folders found. USE WITH CAUTION!
+- Use the `-i <path>` argument to ignore certain paths.
+- Add the `-w` flag to wipe all `node_modules` folders found. USE WITH CAUTION!
 
 ## Usage Example
 
