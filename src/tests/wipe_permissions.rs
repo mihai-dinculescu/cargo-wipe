@@ -5,7 +5,7 @@ mod wipe_permissions_tests {
     use std::path::PathBuf;
 
     use crate::command::FolderNameEnum;
-    use crate::tests::helpers::path::TestPath;
+    use crate::tests::helpers::test_run::TestRun;
     use crate::wipe::{Wipe, WipeParams};
 
     #[parameterized(
@@ -18,16 +18,16 @@ mod wipe_permissions_tests {
         use std::fs;
         use std::os::unix::fs::PermissionsExt;
 
-        let test_path = TestPath::new(3, &folder_name);
+        let test_run = TestRun::new(&folder_name, 3, 0);
 
         let params = WipeParams {
             wipe,
-            path: PathBuf::from(&test_path),
+            path: PathBuf::from(&test_run),
             folder_name,
             ignores: Vec::new(),
         };
 
-        let first_hit = test_path.hits.first().unwrap().clone();
+        let first_hit = test_run.hits.first().unwrap().clone();
 
         let permissions = fs::Permissions::from_mode(0o000);
         fs::set_permissions(&first_hit, permissions).unwrap();
@@ -39,7 +39,7 @@ mod wipe_permissions_tests {
         println!("{}", output);
 
         // hits should be listed and wiped if wipe is true
-        for path in &test_path.hits {
+        for path in &test_run.hits {
             let expected = String::from(path.to_str().unwrap());
 
             if path.to_str() == first_hit.to_str() {
@@ -66,16 +66,16 @@ mod wipe_permissions_tests {
         use std::fs;
         use std::os::unix::fs::PermissionsExt;
 
-        let test_path = TestPath::new(3, &folder_name);
+        let test_run = TestRun::new(&folder_name, 3, 0);
 
         let params = WipeParams {
             wipe,
-            path: PathBuf::from(&test_path),
+            path: PathBuf::from(&test_run),
             folder_name,
             ignores: Vec::new(),
         };
 
-        let first_hit = test_path.hits.first().unwrap().clone();
+        let first_hit = test_run.hits.first().unwrap().clone();
 
         let permissions = fs::Permissions::from_mode(0o000);
         fs::set_permissions(&first_hit, permissions).unwrap();
@@ -87,7 +87,7 @@ mod wipe_permissions_tests {
         println!("{}", output);
 
         // hits should be listed and wiped if wipe is true
-        for path in &test_path.hits {
+        for path in &test_run.hits {
             let expected = String::from(path.to_str().unwrap());
 
             if path.to_str() == first_hit.to_str() {

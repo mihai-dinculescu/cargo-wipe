@@ -1,10 +1,10 @@
 use parameterized::parameterized;
-use std::io::Cursor;
 use std::path::PathBuf;
+use std::{io::Cursor, println};
 use yansi::Paint;
 
 use crate::command::FolderNameEnum;
-use crate::tests::helpers::path::TestPath;
+use crate::tests::helpers::test_run::TestRun;
 use crate::wipe::{Wipe, WipeParams, SPACING_FILES, SPACING_SIZE};
 
 #[parameterized(
@@ -15,11 +15,11 @@ use crate::wipe::{Wipe, WipeParams, SPACING_FILES, SPACING_SIZE};
     wipe = { false, true, false, true },
 )]
 fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
-    let test_path = TestPath::new(3, &folder_name);
+    let test_run = TestRun::new(&folder_name, 3, 0);
 
     let params = WipeParams {
         wipe,
-        path: PathBuf::from(&test_path),
+        path: PathBuf::from(&test_run),
         folder_name: folder_name.clone(),
         ignores: Vec::new(),
     };
@@ -42,14 +42,14 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
 
     // body
     // hits should be listed and wiped if wipe is true
-    for path in &test_path.hits {
+    for path in &test_run.hits {
         let expected = String::from(path.to_str().unwrap());
         assert_eq!(output.contains(&expected), true);
         assert_eq!(path.exists(), !wipe);
     }
 
     // misses should not be listed and not wiped
-    for path in &test_path.misses {
+    for path in &test_run.misses {
         let expected = String::from(path.to_str().unwrap());
         assert_eq!(output.contains(&expected), false);
         assert_eq!(path.exists(), true);
@@ -66,9 +66,12 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     let expected = format!("{:>size$}", Paint::cyan("Size"), size = SPACING_SIZE);
     assert!(output.contains(&expected));
 
-    let expected = format!("{}", Paint::cyan(test_path.path.display()));
+    let expected = format!("{}", Paint::cyan(test_run.path.display()));
     let output = &output.replacen(&expected, "", 1);
     assert!(output.contains(&expected));
+
+    let expected = format!("{}", Paint::yellow("Ignored"));
+    assert!(!output.contains(&expected));
 
     // footer
     if wipe {
@@ -92,12 +95,12 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     wipe = { false, true, false, true },
 )]
 fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
-    let test_path = TestPath::new(0, &folder_name);
+    let test_run = TestRun::new(&folder_name, 0, 0);
 
     let params = WipeParams {
         wipe,
-        path: PathBuf::from(&test_path),
-        folder_name: folder_name,
+        path: PathBuf::from(&test_run),
+        folder_name,
         ignores: Vec::new(),
     };
 
@@ -114,7 +117,7 @@ fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
     let expected = format!("{}", Paint::cyan("Size"));
     assert!(!output.contains(&expected));
 
-    let expected = format!("{}", Paint::cyan(test_path.path.display()));
+    let expected = format!("{}", Paint::cyan(test_run.path.display()));
     let output = &output.replacen(&expected, "", 1);
     assert!(!output.contains(&expected));
 
@@ -129,11 +132,79 @@ fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
     let expected = format!("{:>size$}", Paint::cyan("Size"), size = SPACING_SIZE);
     assert!(!output.contains(&expected));
 
-    let expected = format!("{}", Paint::cyan(test_path.path.display()));
+    let expected = format!("{}", Paint::cyan(test_run.path.display()));
     let output = &output.replacen(&expected, "", 1);
-    assert!(!output.contains(&expected));
+    assert_eq!(output.contains(&expected), false);
 
     // footer
     let expected = format!("{}", Paint::green("Nothing found!"));
     assert!(output.contains(&expected));
+}
+
+#[parameterized(
+    folder_name = {
+        FolderNameEnum::NodeModules, FolderNameEnum::NodeModules,
+        FolderNameEnum::Target, FolderNameEnum::Target,
+    },
+    wipe = { false, true, false, true },
+)]
+fn run_with_ignores(folder_name: FolderNameEnum, wipe: bool) {
+    let test_run = TestRun::new(&folder_name, 3, 3);
+
+    let params = WipeParams {
+        wipe,
+        path: PathBuf::from(&test_run),
+        folder_name,
+        ignores: test_run.ignores.clone(),
+    };
+
+    let mut buff = Cursor::new(Vec::new());
+    Wipe::new(&mut buff, &params).run().unwrap();
+
+    let output = std::str::from_utf8(&buff.get_ref()).unwrap();
+    let lines = output.lines();
+    println!("{}", output);
+
+    // body
+    // hits should be listed and wiped if wipe is true
+    for path in &test_run.hits {
+        let expected = String::from(path.to_str().unwrap());
+        let mut lines = lines.clone();
+        let line = lines.find(|l| l.contains(&expected));
+
+        assert!(line.is_some());
+        let line = line.unwrap();
+
+        assert_eq!(line.contains(&expected), true);
+        assert_eq!(line.contains("[Ignored]"), false);
+        assert_eq!(path.exists(), !wipe);
+    }
+
+    // ignores should be listed and not wiped if wipe is true
+    for path in &test_run.ignores {
+        let expected = String::from(path.to_str().unwrap());
+        let mut lines = lines.clone();
+        let line = lines.find(|l| l.contains(&expected));
+
+        assert!(line.is_some());
+        let line = line.unwrap();
+
+        assert_eq!(line.contains(&expected), true);
+        assert_eq!(line.contains("[Ignored]"), true);
+        assert_eq!(path.exists(), true);
+    }
+
+    // misses should not be listed and not wiped
+    for path in &test_run.misses {
+        let expected = String::from(path.to_str().unwrap());
+        let mut lines = lines.clone();
+        let line = lines.find(|l| l.contains(&expected));
+
+        assert!(line.is_none());
+        assert_eq!(path.exists(), true);
+    }
+
+    // summary should be displayed
+    let expected = format!("{}", Paint::yellow("Ignored"));
+    assert_eq!(output.contains(&expected), true);
 }

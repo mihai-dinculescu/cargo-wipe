@@ -5,30 +5,32 @@ use std::path::{Path, PathBuf};
 use crate::command::FolderNameEnum;
 
 #[derive(Debug)]
-pub struct TestPath {
+pub struct TestRun {
     rng: ThreadRng,
     pub path: PathBuf,
     pub hits: Vec<PathBuf>,
+    pub ignores: Vec<PathBuf>,
     pub misses: Vec<PathBuf>,
 }
 
-impl Drop for TestPath {
+impl Drop for TestRun {
     fn drop(&mut self) {
         std::fs::remove_dir_all(&self.path).unwrap();
     }
 }
 
-impl From<&TestPath> for PathBuf {
-    fn from(test_path: &TestPath) -> Self {
+impl From<&TestRun> for PathBuf {
+    fn from(test_path: &TestRun) -> Self {
         test_path.path.clone()
     }
 }
 
-impl TestPath {
-    pub fn new(hits_count: u32, folder_name: &FolderNameEnum) -> Self {
-        let mut test_path = TestPath::generate_parent();
+impl TestRun {
+    pub fn new(folder_name: &FolderNameEnum, hits_count: u32, ignores_count: u32) -> Self {
+        let mut test_path = TestRun::generate_parent();
 
-        test_path.generate_hits(hits_count, folder_name);
+        test_path.generate_hits(folder_name, hits_count);
+        test_path.generate_ignores(folder_name, ignores_count);
         test_path.generate_no_hits();
         test_path.generate_opposite(folder_name);
         test_path.generate_invalid(folder_name);
@@ -37,7 +39,7 @@ impl TestPath {
         test_path
     }
 
-    pub fn generate_hits(&mut self, hits_count: u32, folder_name: &FolderNameEnum) {
+    pub fn generate_hits(&mut self, folder_name: &FolderNameEnum, hits_count: u32) {
         for _ in 0..hits_count {
             let name: String = (&mut self.rng)
                 .sample_iter(&Alphanumeric)
@@ -58,6 +60,30 @@ impl TestPath {
             }
 
             self.hits.push(path);
+        }
+    }
+
+    pub fn generate_ignores(&mut self, folder_name: &FolderNameEnum, ignores_count: u32) {
+        for _ in 0..ignores_count {
+            let name: String = (&mut self.rng)
+                .sample_iter(&Alphanumeric)
+                .take(16)
+                .map(char::from)
+                .collect();
+
+            let path = self
+                .path
+                .join(Path::new(&name))
+                .join(Path::new(&folder_name.to_string()));
+
+            std::fs::create_dir_all(&path).unwrap();
+
+            if folder_name == &FolderNameEnum::Target {
+                let file_path = path.join(".rustc_info.json");
+                std::fs::File::create(file_path).unwrap();
+            }
+
+            self.ignores.push(path);
         }
     }
 
@@ -153,10 +179,11 @@ impl TestPath {
 
         std::fs::create_dir_all(&path).unwrap();
 
-        TestPath {
+        TestRun {
             rng,
             path,
             hits: Vec::new(),
+            ignores: Vec::new(),
             misses: Vec::new(),
         }
     }
