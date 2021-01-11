@@ -21,9 +21,10 @@ mod wipe_permissions_tests {
         let test_path = TestPath::new(3, &folder_name);
 
         let params = WipeParams {
-            folder_name,
-            path: PathBuf::from(&test_path),
             wipe,
+            path: PathBuf::from(&test_path),
+            folder_name,
+            ignores: Vec::new(),
         };
 
         let first_hit = test_path.hits.first().unwrap().clone();
@@ -68,9 +69,10 @@ mod wipe_permissions_tests {
         let test_path = TestPath::new(3, &folder_name);
 
         let params = WipeParams {
-            folder_name,
-            path: PathBuf::from(&test_path),
             wipe,
+            path: PathBuf::from(&test_path),
+            folder_name,
+            ignores: Vec::new(),
         };
 
         let first_hit = test_path.hits.first().unwrap().clone();
