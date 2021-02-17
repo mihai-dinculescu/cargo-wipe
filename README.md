@@ -23,23 +23,29 @@ cargo install cargo-wipe
 cargo wipe --help
 ```
 
-## target
+## Usage
+
+To delete all folders called `folder-name` folders run
+
+```
+cargo wipe folder-name
+```
+
+where `folder-name` is one of `rust`, `target`, `node`, `node_modules`. For example:
 
 ```
 cargo wipe target
 ```
 
-- Use the `-i <path>` argument to ignore certain paths.
-- Add the `-w` flag to wipe all Rust `target` folders found. USE WITH CAUTION!
-
-## node_modules
+By default it will run in dry-run mode and just print the list of directories to delete. To actually delete them run it again with the `-w` flag.
 
 ```
-cargo wipe node_modules
+cargo wipe target -w
 ```
 
-- Use the `-i <path>` argument to ignore certain paths.
-- Add the `-w` flag to wipe all `node_modules` folders found. USE WITH CAUTION!
+For `rust`, `node`, and `node_modules` it will find all directories with that name. For `target` it will also check that the directory contains a file called `.rustc_info.json`. 
+
+You can use the `-i <path>` argument to ignore certain paths.
 
 ## Usage Example
 
