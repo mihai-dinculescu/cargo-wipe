@@ -25,25 +25,30 @@ cargo wipe --help
 
 ## Usage
 
-To delete all folders called `folder-name` folders run
+To find build folders for `language` that can potentially be deleted run
 
 ```
-cargo wipe folder-name
+cargo wipe language
 ```
 
-where `folder-name` is one of `rust`, `target`, `node`, `node_modules`. For example:
+where `language` is `rust` or `node`. For example:
 
 ```
-cargo wipe target
+cargo wipe rust
 ```
 
-By default it will run in dry-run mode and just print the list of directories to delete. To actually delete them run it again with the `-w` flag.
+This will run in dry-run mode and just print the list of directories to delete. To actually delete them run it again with the `-w` flag.
 
 ```
-cargo wipe target -w
+cargo wipe rust -w
 ```
 
-For `rust`, `node`, and `node_modules` it will find all directories with that name. For `target` it will also check that the directory contains a file called `.rustc_info.json`. 
+Directories are found according to the following logic:
+
+* `rust`: all directories called `target` containing a file called `.rustc_info.json`.
+* `node`: all directories called `node_modules`.
+
+`target` can be used as an alias for `rust`, and `node_modules` can be used as an alias for `node`.
 
 You can use the `-i <path>` argument to ignore certain paths.
 
