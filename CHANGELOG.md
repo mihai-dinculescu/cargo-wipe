@@ -6,6 +6,10 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+### Removed
+
+- The "target" and "node_modules" aliases have been deprecated and removed from the documentation. They will continue to work for a few more releases, but everyone is encouraged to switch to the preferred "rust" and "node" namings.
+
 ## [v0.3.1] - 2021-01-11
 
 ### Added

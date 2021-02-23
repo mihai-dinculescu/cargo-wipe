@@ -25,13 +25,13 @@ cargo wipe --help
 
 ## Usage
 
-To find build folders for `language` that can potentially be deleted run
+To find build folders for `<language>` that can potentially be deleted run
 
 ```
-cargo wipe language
+cargo wipe <language>
 ```
 
-where `language` is `rust` or `node`. For example:
+where `<language>` is `rust` or `node`. For example:
 
 ```
 cargo wipe rust
@@ -45,10 +45,8 @@ cargo wipe rust -w
 
 Directories are found according to the following logic:
 
-* `rust`: all directories called `target` containing a file called `.rustc_info.json`.
-* `node`: all directories called `node_modules`.
-
-`target` can be used as an alias for `rust`, and `node_modules` can be used as an alias for `node`.
+- `rust`: all directories called `target` containing a file called `.rustc_info.json`.
+- `node`: all directories called `node_modules`.
 
 You can use the `-i <path>` argument to ignore certain paths.
 

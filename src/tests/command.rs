@@ -38,10 +38,7 @@ fn folder_name_string_to_enum_error(folder_name_string: &str) {
     let err = result.err().unwrap();
 
     assert_eq!(err.kind(), io::ErrorKind::InvalidInput);
-    assert_eq!(
-        err.to_string(),
-        "Valid options are: rust | target | node | node_modules"
-    );
+    assert_eq!(err.to_string(), "Valid options are: rust | node");
 }
 
 #[parameterized(

@@ -10,8 +10,8 @@ pub enum Command {
 
 #[derive(Debug, StructOpt)]
 pub struct Args {
-    #[structopt()]
-    /// rust | target | node | node_modules
+    #[structopt(name = "language")]
+    /// rust | node
     pub folder_name: FolderNameEnum,
     /// Caution! If set it will wipe all folders found! Unset by default
     #[structopt(short, long)]
@@ -41,7 +41,7 @@ impl str::FromStr for FolderNameEnum {
             "rust" => Ok(FolderNameEnum::Rust),
             _ => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Valid options are: rust | target | node | node_modules",
+                "Valid options are: rust | node",
             )),
         }
     }
