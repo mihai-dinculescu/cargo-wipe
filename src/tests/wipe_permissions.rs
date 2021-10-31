@@ -35,7 +35,7 @@ mod wipe_permissions_tests {
         let mut buff = Cursor::new(Vec::new());
         Wipe::new(&mut buff, &params).run().unwrap();
 
-        let output = std::str::from_utf8(&buff.get_ref()).unwrap();
+        let output = std::str::from_utf8(buff.get_ref()).unwrap();
         println!("{}", output);
 
         // hits should be listed and wiped if wipe is true
@@ -43,10 +43,10 @@ mod wipe_permissions_tests {
             let expected = String::from(path.to_str().unwrap());
 
             if path.to_str() == first_hit.to_str() {
-                assert_eq!(output.contains(&expected), false);
-                assert_eq!(path.exists(), true);
+                assert!(!output.contains(&expected));
+                assert!(path.exists());
             } else {
-                assert_eq!(output.contains(&expected), true);
+                assert!(output.contains(&expected));
                 assert_eq!(path.exists(), !wipe);
             }
         }
@@ -83,18 +83,18 @@ mod wipe_permissions_tests {
         let mut buff = Cursor::new(Vec::new());
         Wipe::new(&mut buff, &params).run().unwrap();
 
-        let output = std::str::from_utf8(&buff.get_ref()).unwrap();
+        let output = std::str::from_utf8(buff.get_ref()).unwrap();
         println!("{}", output);
 
         // hits should be listed and wiped if wipe is true
         for path in &test_run.hits {
             let expected = String::from(path.to_str().unwrap());
 
+            assert!(output.contains(&expected));
+
             if path.to_str() == first_hit.to_str() {
-                assert_eq!(output.contains(&expected), true);
-                assert_eq!(path.exists(), true);
+                assert!(path.exists());
             } else {
-                assert_eq!(output.contains(&expected), true);
                 assert_eq!(path.exists(), !wipe);
             }
         }

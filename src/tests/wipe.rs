@@ -27,7 +27,7 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     let mut buff = Cursor::new(Vec::new());
     Wipe::new(&mut buff, &params).run().unwrap();
 
-    let output = std::str::from_utf8(&buff.get_ref()).unwrap();
+    let output = std::str::from_utf8(buff.get_ref()).unwrap();
     println!("{}", output);
 
     // header
@@ -44,15 +44,15 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     // hits should be listed and wiped if wipe is true
     for path in &test_run.hits {
         let expected = String::from(path.to_str().unwrap());
-        assert_eq!(output.contains(&expected), true);
+        assert!(output.contains(&expected));
         assert_eq!(path.exists(), !wipe);
     }
 
     // misses should not be listed and not wiped
     for path in &test_run.misses {
         let expected = String::from(path.to_str().unwrap());
-        assert_eq!(output.contains(&expected), false);
-        assert_eq!(path.exists(), true);
+        assert!(!output.contains(&expected));
+        assert!(path.exists());
     }
 
     // summary should be displayed
@@ -107,7 +107,7 @@ fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
     let mut buff = Cursor::new(Vec::new());
     Wipe::new(&mut buff, &params).run().unwrap();
 
-    let output = std::str::from_utf8(&buff.get_ref()).unwrap();
+    let output = std::str::from_utf8(buff.get_ref()).unwrap();
     println!("{}", output);
 
     // body
@@ -134,7 +134,7 @@ fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
 
     let expected = format!("{}", Paint::cyan(test_run.path.display()));
     let output = &output.replacen(&expected, "", 1);
-    assert_eq!(output.contains(&expected), false);
+    assert!(!output.contains(&expected));
 
     // footer
     let expected = format!("{}", Paint::green("Nothing found!"));
@@ -161,7 +161,7 @@ fn run_with_ignores(folder_name: FolderNameEnum, wipe: bool) {
     let mut buff = Cursor::new(Vec::new());
     Wipe::new(&mut buff, &params).run().unwrap();
 
-    let output = std::str::from_utf8(&buff.get_ref()).unwrap();
+    let output = std::str::from_utf8(buff.get_ref()).unwrap();
     let lines = output.lines();
     println!("{}", output);
 
@@ -175,8 +175,8 @@ fn run_with_ignores(folder_name: FolderNameEnum, wipe: bool) {
         assert!(line.is_some());
         let line = line.unwrap();
 
-        assert_eq!(line.contains(&expected), true);
-        assert_eq!(line.contains("[Ignored]"), false);
+        assert!(line.contains(&expected));
+        assert!(!line.contains("[Ignored]"));
         assert_eq!(path.exists(), !wipe);
     }
 
@@ -189,9 +189,9 @@ fn run_with_ignores(folder_name: FolderNameEnum, wipe: bool) {
         assert!(line.is_some());
         let line = line.unwrap();
 
-        assert_eq!(line.contains(&expected), true);
-        assert_eq!(line.contains("[Ignored]"), true);
-        assert_eq!(path.exists(), true);
+        assert!(line.contains(&expected));
+        assert!(line.contains("[Ignored]"));
+        assert!(path.exists());
     }
 
     // misses should not be listed and not wiped
@@ -201,10 +201,10 @@ fn run_with_ignores(folder_name: FolderNameEnum, wipe: bool) {
         let line = lines.find(|l| l.contains(&expected));
 
         assert!(line.is_none());
-        assert_eq!(path.exists(), true);
+        assert!(path.exists());
     }
 
     // summary should be displayed
     let expected = format!("{}", Paint::yellow("Ignored"));
-    assert_eq!(output.contains(&expected), true);
+    assert!(output.contains(&expected));
 }

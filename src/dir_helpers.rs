@@ -68,14 +68,13 @@ pub fn get_paths_to_delete(path: impl Into<PathBuf>, folder_name: &FolderNameEnu
                 let size = match file.metadata() {
                     Ok(data) if data.is_dir() => {
                         if file.file_name() == folder_name.to_string()[..] {
-                            if is_valid_target(file.path(), &folder_name) {
+                            if is_valid_target(file.path(), folder_name) {
                                 acc.push(Ok(file.path().display().to_string()));
                             }
-                            acc
                         } else {
                             acc.append(&mut walk(fs::read_dir(file.path()), folder_name)?);
-                            acc
                         }
+                        acc
                     }
                     _ => acc,
                 };
