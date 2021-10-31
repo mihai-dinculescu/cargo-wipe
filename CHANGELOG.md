@@ -6,9 +6,23 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+## [v0.3.2] - 2021-10-31
+
+### Changed
+
+- Upgraded to Rust 2021
+
+### Fixed
+
+- The argument parsing has been improved so that it is less confusing
+
 ### Removed
 
 - The "target" and "node_modules" aliases have been deprecated and removed from the documentation. They will continue to work for a few more releases, but everyone is encouraged to switch to the preferred "rust" and "node" namings.
+
+### Added
+
+- Specific paths can now be ignored by using the `i` argument
 
 ## [v0.3.1] - 2021-01-11
 
@@ -72,6 +86,7 @@ file. This change log follows the conventions of
 ### Initial Release of cargo-wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
+[v0.3.2]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.2
 [v0.3.1]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.1
 [v0.3.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.0
 [v0.2.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.2.0
