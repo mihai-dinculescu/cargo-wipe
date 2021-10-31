@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: master
+          ref: main
       - name: Run cargo login
         run: cargo login ${CRATES_IO_TOKEN}
         env:

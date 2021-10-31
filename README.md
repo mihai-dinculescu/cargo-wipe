@@ -82,13 +82,13 @@ Contributions are welcome and encouraged! See [TODO.md][todo] for ideas, or sugg
 
 [crates_badge]: https://img.shields.io/crates/v/cargo-wipe.svg
 [crates]: https://crates.io/crates/cargo-wipe
-[ci_badge]: https://github.com/mihai-dinculescu/cargo-wipe/workflows/CI/badge.svg?branch=master
+[ci_badge]: https://github.com/mihai-dinculescu/cargo-wipe/workflows/CI/badge.svg?branch=main
 [ci]: https://github.com/mihai-dinculescu/cargo-wipe/actions
-[codecov_badge]: https://codecov.io/gh/mihai-dinculescu/cargo-wipe/branch/master/graph/badge.svg
+[codecov_badge]: https://codecov.io/gh/mihai-dinculescu/cargo-wipe/branch/main/graph/badge.svg
 [codecov]: https://codecov.io/gh/mihai-dinculescu/cargo-wipe
 [license_badge]: https://img.shields.io/crates/l/cargo-wipe.svg
-[license]: https://github.com/mihai-dinculescu/cargo-wipe/blob/master/LICENSE
+[license]: https://github.com/mihai-dinculescu/cargo-wipe/blob/main/LICENSE
 [crates_installs_badge]: https://img.shields.io/crates/d/cargo-wipe?label=cargo%20installs
 [toolchain]: https://rustup.rs
-[usage_example]: https://github.com/mihai-dinculescu/cargo-wipe/blob/master/assets/screenshot.PNG
+[usage_example]: https://github.com/mihai-dinculescu/cargo-wipe/blob/main/assets/screenshot.PNG
 [todo]: TODO.md

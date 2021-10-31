@@ -2,13 +2,13 @@ name: Security
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "**/Cargo.toml"
       - "**/Cargo.lock"
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - "**/Cargo.toml"
       - "**/Cargo.lock"
