@@ -2,7 +2,7 @@ use rand::distributions::Alphanumeric;
 use rand::{prelude::ThreadRng, thread_rng, Rng};
 use std::path::{Path, PathBuf};
 
-use crate::command::FolderNameEnum;
+use crate::command::LanguageEnum;
 
 #[derive(Debug)]
 pub struct TestRun {
@@ -26,20 +26,20 @@ impl From<&TestRun> for PathBuf {
 }
 
 impl TestRun {
-    pub fn new(folder_name: &FolderNameEnum, hits_count: u32, ignores_count: u32) -> Self {
+    pub fn new(language: &LanguageEnum, hits_count: u32, ignores_count: u32) -> Self {
         let mut test_path = TestRun::generate_parent();
 
-        test_path.generate_hits(folder_name, hits_count);
-        test_path.generate_ignores(folder_name, ignores_count);
+        test_path.generate_hits(language, hits_count);
+        test_path.generate_ignores(language, ignores_count);
         test_path.generate_no_hits();
-        test_path.generate_opposite(folder_name);
-        test_path.generate_invalid(folder_name);
-        test_path.generate_partial(folder_name);
+        test_path.generate_opposite(language);
+        test_path.generate_invalid(language);
+        test_path.generate_partial(language);
 
         test_path
     }
 
-    pub fn generate_hits(&mut self, folder_name: &FolderNameEnum, hits_count: u32) {
+    pub fn generate_hits(&mut self, language: &LanguageEnum, hits_count: u32) {
         for _ in 0..hits_count {
             let name: String = (&mut self.rng)
                 .sample_iter(&Alphanumeric)
@@ -50,11 +50,11 @@ impl TestRun {
             let path = self
                 .path
                 .join(Path::new(&name))
-                .join(Path::new(&folder_name.to_string()));
+                .join(Path::new(&language.to_string()));
 
             std::fs::create_dir_all(&path).unwrap();
 
-            if folder_name == &FolderNameEnum::Target {
+            if language == &LanguageEnum::Target {
                 let file_path = path.join(".rustc_info.json");
                 std::fs::File::create(file_path).unwrap();
             }
@@ -63,7 +63,7 @@ impl TestRun {
         }
     }
 
-    pub fn generate_ignores(&mut self, folder_name: &FolderNameEnum, ignores_count: u32) {
+    pub fn generate_ignores(&mut self, language: &LanguageEnum, ignores_count: u32) {
         for _ in 0..ignores_count {
             let name: String = (&mut self.rng)
                 .sample_iter(&Alphanumeric)
@@ -74,11 +74,11 @@ impl TestRun {
             let path = self
                 .path
                 .join(Path::new(&name))
-                .join(Path::new(&folder_name.to_string()));
+                .join(Path::new(&language.to_string()));
 
             std::fs::create_dir_all(&path).unwrap();
 
-            if folder_name == &FolderNameEnum::Target {
+            if language == &LanguageEnum::Target {
                 let file_path = path.join(".rustc_info.json");
                 std::fs::File::create(file_path).unwrap();
             }
@@ -103,8 +103,8 @@ impl TestRun {
         }
     }
 
-    pub fn generate_opposite(&mut self, folder_name: &FolderNameEnum) {
-        let opposite = if matches!(folder_name, FolderNameEnum::NodeModules) {
+    pub fn generate_opposite(&mut self, language: &LanguageEnum) {
+        let opposite = if matches!(language, LanguageEnum::NodeModules) {
             "target"
         } else {
             "node_modules"
@@ -123,8 +123,8 @@ impl TestRun {
         self.misses.push(path);
     }
 
-    pub fn generate_invalid(&mut self, folder_name: &FolderNameEnum) {
-        if folder_name == &FolderNameEnum::Target {
+    pub fn generate_invalid(&mut self, language: &LanguageEnum) {
+        if language == &LanguageEnum::Target {
             let name: String = (&mut self.rng)
                 .sample_iter(&Alphanumeric)
                 .take(16)
@@ -134,7 +134,7 @@ impl TestRun {
             let path = self
                 .path
                 .join(Path::new(&name))
-                .join(Path::new(&folder_name.to_string()));
+                .join(Path::new(&language.to_string()));
 
             std::fs::create_dir_all(&path).unwrap();
 
@@ -142,7 +142,7 @@ impl TestRun {
         }
     }
 
-    pub fn generate_partial(&mut self, folder_name: &FolderNameEnum) {
+    pub fn generate_partial(&mut self, language: &LanguageEnum) {
         let name: String = (&mut self.rng)
             .sample_iter(&Alphanumeric)
             .take(16)
@@ -153,7 +153,7 @@ impl TestRun {
             .take(16)
             .map(char::from)
             .collect();
-        let name_inner = format!("{}_{}", folder_name, name_inner);
+        let name_inner = format!("{}_{}", language, name_inner);
 
         let path = self
             .path

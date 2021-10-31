@@ -3,24 +3,24 @@ use std::path::PathBuf;
 use std::{io::Cursor, println};
 use yansi::Paint;
 
-use crate::command::FolderNameEnum;
+use crate::command::LanguageEnum;
 use crate::tests::helpers::test_run::TestRun;
 use crate::wipe::{Wipe, WipeParams, SPACING_FILES, SPACING_SIZE};
 
 #[parameterized(
-    folder_name = {
-        FolderNameEnum::NodeModules, FolderNameEnum::NodeModules,
-        FolderNameEnum::Target, FolderNameEnum::Target,
+    language = {
+        LanguageEnum::NodeModules, LanguageEnum::NodeModules,
+        LanguageEnum::Target, LanguageEnum::Target,
     },
     wipe = { false, true, false, true },
 )]
-fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
-    let test_run = TestRun::new(&folder_name, 3, 0);
+fn run_with_hits(language: LanguageEnum, wipe: bool) {
+    let test_run = TestRun::new(&language, 3, 0);
 
     let params = WipeParams {
         wipe,
         path: PathBuf::from(&test_run),
-        folder_name: folder_name.clone(),
+        language: language.clone(),
         ignores: Vec::new(),
     };
 
@@ -37,7 +37,7 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     let expected = format!("{}", Paint::red("[WIPING]").bold());
     assert_eq!(output.contains(&expected), wipe);
 
-    let expected = format!(r#""{}""#, Paint::cyan(folder_name));
+    let expected = format!(r#""{}""#, Paint::cyan(language));
     assert!(output.contains(&expected));
 
     // body
@@ -80,7 +80,7 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
     } else {
         let expected = format!(
             "Run {} to wipe all folders found. {}",
-            Paint::red(format!("cargo wipe {} -w", params.folder_name)),
+            Paint::red(format!("cargo wipe {} -w", params.language)),
             Paint::red("USE WITH CAUTION!")
         );
         assert!(output.contains(&expected));
@@ -88,19 +88,19 @@ fn run_with_hits(folder_name: FolderNameEnum, wipe: bool) {
 }
 
 #[parameterized(
-    folder_name = {
-        FolderNameEnum::NodeModules, FolderNameEnum::NodeModules,
-        FolderNameEnum::Target, FolderNameEnum::Target,
+    language = {
+        LanguageEnum::NodeModules, LanguageEnum::NodeModules,
+        LanguageEnum::Target, LanguageEnum::Target,
     },
     wipe = { false, true, false, true },
 )]
-fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
-    let test_run = TestRun::new(&folder_name, 0, 0);
+fn run_no_hits(language: LanguageEnum, wipe: bool) {
+    let test_run = TestRun::new(&language, 0, 0);
 
     let params = WipeParams {
         wipe,
         path: PathBuf::from(&test_run),
-        folder_name,
+        language,
         ignores: Vec::new(),
     };
 
@@ -142,19 +142,19 @@ fn run_no_hits(folder_name: FolderNameEnum, wipe: bool) {
 }
 
 #[parameterized(
-    folder_name = {
-        FolderNameEnum::NodeModules, FolderNameEnum::NodeModules,
-        FolderNameEnum::Target, FolderNameEnum::Target,
+    language = {
+        LanguageEnum::NodeModules, LanguageEnum::NodeModules,
+        LanguageEnum::Target, LanguageEnum::Target,
     },
     wipe = { false, true, false, true },
 )]
-fn run_with_ignores(folder_name: FolderNameEnum, wipe: bool) {
-    let test_run = TestRun::new(&folder_name, 3, 3);
+fn run_with_ignores(language: LanguageEnum, wipe: bool) {
+    let test_run = TestRun::new(&language, 3, 3);
 
     let params = WipeParams {
         wipe,
         path: PathBuf::from(&test_run),
-        folder_name,
+        language,
         ignores: test_run.ignores.clone(),
     };
 

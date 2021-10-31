@@ -3,7 +3,7 @@ use number_prefix::NumberPrefix;
 use std::path::PathBuf;
 use std::{fs, io};
 
-use crate::command::FolderNameEnum;
+use crate::command::DirectoryEnum;
 
 #[derive(Debug, Copy, Clone)]
 pub struct DirInfo {
@@ -40,8 +40,8 @@ impl DirInfo {
     }
 }
 
-fn is_valid_target(path: PathBuf, folder_name: &FolderNameEnum) -> bool {
-    if folder_name == &FolderNameEnum::Target {
+fn is_valid_target(path: PathBuf, directory: &DirectoryEnum) -> bool {
+    if directory == &DirectoryEnum::Target {
         let file_path = path.join(".rustc_info.json");
         return file_path.exists();
     }
@@ -51,8 +51,8 @@ fn is_valid_target(path: PathBuf, folder_name: &FolderNameEnum) -> bool {
 
 pub type PathsResult = io::Result<Vec<Result<String, io::Error>>>;
 
-pub fn get_paths_to_delete(path: impl Into<PathBuf>, folder_name: &FolderNameEnum) -> PathsResult {
-    fn walk(dir: io::Result<fs::ReadDir>, folder_name: &FolderNameEnum) -> PathsResult {
+pub fn get_paths_to_delete(path: impl Into<PathBuf>, directory: &DirectoryEnum) -> PathsResult {
+    fn walk(dir: io::Result<fs::ReadDir>, directory: &DirectoryEnum) -> PathsResult {
         let mut dir = match dir {
             Ok(dir) => dir,
             Err(e) => {
@@ -67,12 +67,12 @@ pub fn get_paths_to_delete(path: impl Into<PathBuf>, folder_name: &FolderNameEnu
 
                 let size = match file.metadata() {
                     Ok(data) if data.is_dir() => {
-                        if file.file_name() == folder_name.to_string()[..] {
-                            if is_valid_target(file.path(), folder_name) {
+                        if file.file_name() == directory.to_string()[..] {
+                            if is_valid_target(file.path(), directory) {
                                 acc.push(Ok(file.path().display().to_string()));
                             }
                         } else {
-                            acc.append(&mut walk(fs::read_dir(file.path()), folder_name)?);
+                            acc.append(&mut walk(fs::read_dir(file.path()), directory)?);
                         }
                         acc
                     }
@@ -84,7 +84,7 @@ pub fn get_paths_to_delete(path: impl Into<PathBuf>, folder_name: &FolderNameEnu
         )
     }
 
-    walk(fs::read_dir(path.into()), folder_name)
+    walk(fs::read_dir(path.into()), directory)
 }
 
 pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {

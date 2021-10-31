@@ -10,9 +10,8 @@ pub enum Command {
 
 #[derive(Debug, StructOpt)]
 pub struct Args {
-    #[structopt(name = "language")]
     /// rust | node
-    pub folder_name: FolderNameEnum,
+    pub language: LanguageEnum,
     /// Caution! If set it will wipe all folders found! Unset by default
     #[structopt(short, long)]
     pub wipe: bool,
@@ -22,7 +21,7 @@ pub struct Args {
 }
 
 #[derive(Debug, PartialEq, Clone, StructOpt)]
-pub enum FolderNameEnum {
+pub enum LanguageEnum {
     #[structopt(name = "node_modules")]
     NodeModules,
     Node,
@@ -30,15 +29,21 @@ pub enum FolderNameEnum {
     Rust,
 }
 
-impl str::FromStr for FolderNameEnum {
+#[derive(Debug, PartialEq)]
+pub enum DirectoryEnum {
+    NodeModules,
+    Target,
+}
+
+impl str::FromStr for LanguageEnum {
     type Err = io::Error;
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
-        match value.trim() {
-            "node_modules" => Ok(FolderNameEnum::NodeModules),
-            "node" => Ok(FolderNameEnum::Node),
-            "target" => Ok(FolderNameEnum::Target),
-            "rust" => Ok(FolderNameEnum::Rust),
+        match value.to_lowercase().trim() {
+            "node_modules" => Ok(LanguageEnum::NodeModules),
+            "node" => Ok(LanguageEnum::Node),
+            "target" => Ok(LanguageEnum::Target),
+            "rust" => Ok(LanguageEnum::Rust),
             _ => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "Valid options are: rust | node",
@@ -47,13 +52,33 @@ impl str::FromStr for FolderNameEnum {
     }
 }
 
-impl fmt::Display for FolderNameEnum {
+impl fmt::Display for LanguageEnum {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            FolderNameEnum::NodeModules => write!(f, "node_modules"),
-            FolderNameEnum::Target => write!(f, "target"),
-            // variations like `Node` and `Rust` should never get displayed
-            _ => Err(std::fmt::Error),
+            LanguageEnum::Node => write!(f, "node"),
+            LanguageEnum::NodeModules => write!(f, "node_modules"),
+            LanguageEnum::Rust => write!(f, "rust"),
+            LanguageEnum::Target => write!(f, "target"),
+        }
+    }
+}
+
+impl From<LanguageEnum> for DirectoryEnum {
+    fn from(language: LanguageEnum) -> Self {
+        match language {
+            LanguageEnum::Node => DirectoryEnum::NodeModules,
+            LanguageEnum::NodeModules => DirectoryEnum::NodeModules,
+            LanguageEnum::Rust => DirectoryEnum::Target,
+            LanguageEnum::Target => DirectoryEnum::Target,
+        }
+    }
+}
+
+impl fmt::Display for DirectoryEnum {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            DirectoryEnum::NodeModules => write!(f, "node_modules"),
+            DirectoryEnum::Target => write!(f, "target"),
         }
     }
 }

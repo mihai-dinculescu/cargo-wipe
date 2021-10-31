@@ -4,7 +4,8 @@ use std::path::PathBuf;
 use std::{env, fmt::Display};
 use yansi::Paint;
 
-use crate::command::{Args, FolderNameEnum};
+use crate::command::DirectoryEnum;
+use crate::command::{Args, LanguageEnum};
 use crate::dir_helpers::{dir_size, get_paths_to_delete, DirInfo};
 
 pub const SPACING_FILES: usize = 12;
@@ -15,7 +16,7 @@ pub const SPACING_PATH: usize = 9;
 pub struct WipeParams {
     pub wipe: bool,
     pub path: PathBuf,
-    pub folder_name: FolderNameEnum,
+    pub language: LanguageEnum,
     pub ignores: Vec<PathBuf>,
 }
 
@@ -26,10 +27,7 @@ impl WipeParams {
         Ok(Self {
             wipe: args.wipe,
             path,
-            folder_name: match args.folder_name {
-                FolderNameEnum::Node | FolderNameEnum::NodeModules => FolderNameEnum::NodeModules,
-                FolderNameEnum::Rust | FolderNameEnum::Target => FolderNameEnum::Target,
-            },
+            language: args.language.clone(),
             ignores: args.ignores.clone(),
         })
     }
@@ -76,10 +74,12 @@ where
             write!(self.stdout, "{}", Paint::green("[DRY RUN]").bold())?;
         }
 
+        let directory: DirectoryEnum = self.params.language.clone().into();
+
         writeln!(
             self.stdout,
             r#" Recursively searching for all "{}" folders in {}..."#,
-            Paint::cyan(&self.params.folder_name),
+            Paint::cyan(&directory),
             Paint::cyan(self.params.path.display()),
         )?;
 
@@ -89,7 +89,8 @@ where
     }
 
     fn write_content(&mut self) -> io::Result<()> {
-        let paths_to_delete = get_paths_to_delete(&self.params.path, &self.params.folder_name)?;
+        let directory: DirectoryEnum = self.params.language.clone().into();
+        let paths_to_delete = get_paths_to_delete(&self.params.path, &directory)?;
         let paths_to_delete = paths_to_delete
             .iter()
             .filter_map(|p| match p {
@@ -253,7 +254,7 @@ where
                 writeln!(
                     self.stdout,
                     "Run {} to wipe all folders found. {}",
-                    Paint::red(format!("cargo wipe {} -w", self.params.folder_name)),
+                    Paint::red(format!("cargo wipe {} -w", self.params.language)),
                     Paint::red("USE WITH CAUTION!")
                 )?;
             } else {

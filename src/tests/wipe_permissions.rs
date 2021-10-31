@@ -4,26 +4,26 @@ mod wipe_permissions_tests {
     use std::io::Cursor;
     use std::path::PathBuf;
 
-    use crate::command::FolderNameEnum;
+    use crate::command::LanguageEnum;
     use crate::tests::helpers::test_run::TestRun;
     use crate::wipe::{Wipe, WipeParams};
 
     #[parameterized(
-        folder_name = {
-            FolderNameEnum::Target, FolderNameEnum::Target,
+        language = {
+            LanguageEnum::Target, LanguageEnum::Target,
         },
         wipe = { false, true },
     )]
-    fn rust_with_inaccessible_folders(folder_name: FolderNameEnum, wipe: bool) {
+    fn rust_with_inaccessible_folders(language: LanguageEnum, wipe: bool) {
         use std::fs;
         use std::os::unix::fs::PermissionsExt;
 
-        let test_run = TestRun::new(&folder_name, 3, 0);
+        let test_run = TestRun::new(&language, 3, 0);
 
         let params = WipeParams {
             wipe,
             path: PathBuf::from(&test_run),
-            folder_name,
+            language,
             ignores: Vec::new(),
         };
 
@@ -57,21 +57,21 @@ mod wipe_permissions_tests {
     }
 
     #[parameterized(
-        folder_name = {
-            FolderNameEnum::NodeModules, FolderNameEnum::NodeModules,
+        language = {
+            LanguageEnum::NodeModules, LanguageEnum::NodeModules,
         },
         wipe = { false, true },
     )]
-    fn node_with_inaccessible_folders(folder_name: FolderNameEnum, wipe: bool) {
+    fn node_with_inaccessible_folders(language: LanguageEnum, wipe: bool) {
         use std::fs;
         use std::os::unix::fs::PermissionsExt;
 
-        let test_run = TestRun::new(&folder_name, 3, 0);
+        let test_run = TestRun::new(&language, 3, 0);
 
         let params = WipeParams {
             wipe,
             path: PathBuf::from(&test_run),
-            folder_name,
+            language,
             ignores: Vec::new(),
         };
 
