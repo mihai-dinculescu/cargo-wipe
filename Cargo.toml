@@ -18,5 +18,5 @@ structopt = "0.3"
 yansi = "0.5"
 
 [dev-dependencies]
-parameterized = "0.3"
+parameterized = "1.0"
 rand = "0.8"

@@ -6,6 +6,10 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+### Changed
+
+- All dependencies have been updated to their latest version.
+
 ## [v0.3.2] - 2021-10-31
 
 ### Changed
