@@ -6,6 +6,8 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+## [v0.3.3] - 2022-08-22
+
 ### Changed
 
 - All dependencies have been updated to their latest version.
@@ -90,6 +92,7 @@ file. This change log follows the conventions of
 ### Initial Release of cargo-wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
+[v0.3.3]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.3
 [v0.3.2]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.2
 [v0.3.1]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.1
 [v0.3.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.0
