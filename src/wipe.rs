@@ -12,7 +12,7 @@ pub const SPACING_FILES: usize = 12;
 pub const SPACING_SIZE: usize = 18;
 pub const SPACING_PATH: usize = 9;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct WipeParams {
     pub wipe: bool,
     pub path: PathBuf,

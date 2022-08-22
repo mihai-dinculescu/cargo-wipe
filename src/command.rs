@@ -20,7 +20,7 @@ pub struct Args {
     pub ignores: Vec<path::PathBuf>,
 }
 
-#[derive(Debug, PartialEq, Clone, StructOpt)]
+#[derive(Debug, PartialEq, Eq, Clone, StructOpt)]
 pub enum LanguageEnum {
     #[structopt(name = "node_modules")]
     NodeModules,
@@ -29,7 +29,7 @@ pub enum LanguageEnum {
     Rust,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum DirectoryEnum {
     NodeModules,
     Target,
