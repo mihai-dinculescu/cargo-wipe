@@ -7,39 +7,39 @@
 [![Crates.io][crates_installs_badge]][crates]\
 Cargo subcommand that recursively finds and optionally wipes all "target" or "node_modules" folders that are found in the current path.
 
-# Usage
+## Usage
 
-## Install
+### Install
 
 The [Rust toolchain][toolchain] is a prerequisite.
 
-```
+```bash
 cargo install cargo-wipe
 ```
 
-## Documentation
+### Read the docs
 
-```
+```bash
 cargo wipe --help
 ```
 
-## Usage
+### Use
 
 To find build folders for `<language>` that can potentially be deleted run
 
-```
+```bash
 cargo wipe <language>
 ```
 
 where `<language>` is `rust` or `node`. For example:
 
-```
+```bash
 cargo wipe rust
 ```
 
 This will run in dry-run mode and just print the list of directories to delete. To actually delete them run it again with the `-w` flag.
 
-```
+```bash
 cargo wipe rust -w
 ```
 
@@ -50,35 +50,41 @@ Directories are found according to the following logic:
 
 You can use the `-i <path>` argument to ignore certain paths.
 
-## Usage Example
+### Usage Example
 
 ![Usage Example Screenshot][usage_example]
 
-# Contributions
+## Contributions
 
-Contributions are welcome and encouraged! See [TODO.md][todo] for ideas, or suggest your own!
+Contributions are welcome and encouraged! See [/issues][issues] for ideas, or suggest your own!
+If you're thinking to create a PR with large feature/change, please first discuss it in an issue.
 
-## PR Checks
+### PR Checks
 
 ```bash
     cargo make ci-flow
 ```
 
-## Releases
+### Releases
 
 - Update version in `Cargo.toml`
+- Update CHANGELOG.md
 - Commit
 - Add tag
+  
   ```bash
   git tag -a vX.X.X
   ```
+
 - Push
+
   ```bash
   git push --follow-tags
   ```
+
 - Release\
   Create a [new release](https://github.com/mihai-dinculescu/cargo-wipe/releases). \
-  `publish.yml` GitHub Action will pick it up and do the actual release to https://crates.io/.
+  `publish.yml` GitHub Action will pick it up and do the actual release to [crates.io][crates_io].
 
 [crates_badge]: https://img.shields.io/crates/v/cargo-wipe.svg
 [crates]: https://crates.io/crates/cargo-wipe
@@ -91,4 +97,5 @@ Contributions are welcome and encouraged! See [TODO.md][todo] for ideas, or sugg
 [crates_installs_badge]: https://img.shields.io/crates/d/cargo-wipe?label=cargo%20installs
 [toolchain]: https://rustup.rs
 [usage_example]: https://github.com/mihai-dinculescu/cargo-wipe/blob/main/assets/screenshot.PNG
-[todo]: TODO.md
+[issues]: https://github.com/mihai-dinculescu/cargo-wipe/issues
+[crates_io]: https://crates.io
