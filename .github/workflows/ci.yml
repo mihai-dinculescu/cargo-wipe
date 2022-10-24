@@ -19,7 +19,7 @@ jobs:
           toolchain: stable
           override: true
       - uses: davidB/rust-cargo-make@v1
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Run format
         run: cargo make format
       - name: Run check
