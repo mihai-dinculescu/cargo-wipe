@@ -2,6 +2,7 @@ use std::io::stdout;
 use structopt::StructOpt;
 
 pub mod command;
+pub mod configuration;
 pub mod dir_helpers;
 pub mod wipe;
 
