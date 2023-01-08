@@ -30,7 +30,7 @@ impl Default for Config {
         let rust_language_option = LanguageOption {
             option_name: "rust".to_string(),
             target_folder_regexp: Regex::new(r"target").unwrap(),
-            target_folder_contains_regexp: Vec::default(),
+            target_folder_contains_regexp: vec![Regex::new(r"\.rustc_info\.json").unwrap()],
             parent_folder_contains_regexp: Vec::default(),
         };
 

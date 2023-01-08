@@ -1,8 +1,7 @@
-use std::{collections::HashMap, path::PathBuf};
-
 use regex::Regex;
 use serde::{self, Deserialize, Serialize};
 use serde_regex;
+use std::fmt::Display;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LanguageOption {
@@ -25,4 +24,10 @@ pub struct LanguageOption {
     #[serde(with = "serde_regex")]
     #[serde(default)] // If not supplied, serde supplies an empty vector.
     pub parent_folder_contains_regexp: Vec<Regex>,
+}
+
+impl Display for LanguageOption {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.option_name)
+    }
 }

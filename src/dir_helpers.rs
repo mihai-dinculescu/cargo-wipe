@@ -1,9 +1,12 @@
+use anyhow::Error;
 use num_format::{Locale, ToFormattedString};
 use number_prefix::NumberPrefix;
+use regex::Regex;
 use std::path::PathBuf;
 use std::{fs, io};
 
 use crate::command::DirectoryEnum;
+use crate::configuration::language_option::LanguageOption;
 
 #[derive(Debug, Copy, Clone)]
 pub struct DirInfo {
@@ -40,19 +43,90 @@ impl DirInfo {
     }
 }
 
-fn is_valid_target(path: PathBuf, directory: &DirectoryEnum) -> bool {
-    if directory == &DirectoryEnum::Target {
-        let file_path = path.join(".rustc_info.json");
-        return file_path.exists();
+fn is_valid_target(target_path: PathBuf, language_option: &LanguageOption) -> Result<bool, Error> {
+    // Check if the target folder is a match first
+    let target_is_match = target_path
+        .file_name()
+        .and_then(|file_name| file_name.to_str())
+        .map(|file_name| language_option.target_folder_regexp.is_match(file_name))
+        .unwrap_or(false);
+
+    if true {
+        println!("Target: {:?} is match: {target_is_match}", target_path);
     }
 
-    true
+    if !target_is_match {
+        return Ok(false);
+    }
+
+    // For any additional criteria on the language option, check if everything matches.
+    fn check_contents_with_matches<'a, T>(
+        target_path: &PathBuf,
+        matches_to_check: T,
+    ) -> Result<bool, Error>
+    where
+        T: IntoIterator<Item = &'a Regex>,
+    {
+        let target_contents: Vec<_> = fs::read_dir(&target_path)?
+            .filter_map(|dir_entry| {
+                dir_entry
+                    .ok()
+                    .and_then(|_dir_entry| _dir_entry.file_name().to_str().map(|s| s.to_string()))
+            })
+            .collect();
+
+        Ok(matches_to_check.into_iter().all(|regexp| {
+            // All listed regexp must match at least one file in the target folder
+            target_contents
+                .iter()
+                .any(|file_name| regexp.is_match(file_name))
+        }))
+    }
+
+    // If there are target folder contents to match, check to make sure our matched target is actually a folder.
+    // If the target is not a folder, but there are target folder contents to match, then we should return false.
+    let target_contents_match =
+        if language_option.target_folder_contains_regexp.len() > 0 && target_path.is_dir() {
+            check_contents_with_matches(
+                &target_path,
+                language_option.target_folder_contains_regexp.iter(),
+            )?
+        } else {
+            // This nested if feels a bit ugly. Maybe there's a better flow organization here.
+            if language_option.target_folder_contains_regexp.len() > 0 && target_path.is_file() {
+                false
+            } else {
+                true
+            }
+        };
+
+    let parent_path = target_path.parent();
+    let parent_contents_match =
+        if language_option.parent_folder_contains_regexp.len() > 0 && parent_path.is_some() {
+            let parent_path = parent_path.unwrap().to_path_buf();
+            check_contents_with_matches(
+                &parent_path,
+                language_option.parent_folder_contains_regexp.iter(),
+            )?
+        } else {
+            // This nested if feels a bit ugly. Maybe there's a better flow organization here.
+            if language_option.parent_folder_contains_regexp.len() > 0 && target_path.is_file() {
+                false
+            } else {
+                true
+            }
+        };
+
+    Ok(target_is_match && target_contents_match && parent_contents_match)
 }
 
 pub type PathsResult = io::Result<Vec<Result<String, io::Error>>>;
 
-pub fn get_paths_to_delete(path: impl Into<PathBuf>, directory: &DirectoryEnum) -> PathsResult {
-    fn walk(dir: io::Result<fs::ReadDir>, directory: &DirectoryEnum) -> PathsResult {
+pub fn get_paths_to_delete(
+    path: impl Into<PathBuf>,
+    language_option: &LanguageOption,
+) -> PathsResult {
+    fn walk(dir: io::Result<fs::ReadDir>, language_option: &LanguageOption) -> PathsResult {
         let mut dir = match dir {
             Ok(dir) => dir,
             Err(e) => {
@@ -67,12 +141,11 @@ pub fn get_paths_to_delete(path: impl Into<PathBuf>, directory: &DirectoryEnum) 
 
                 let size = match file.metadata() {
                     Ok(data) if data.is_dir() => {
-                        if file.file_name() == directory.to_string()[..] {
-                            if is_valid_target(file.path(), directory) {
-                                acc.push(Ok(file.path().display().to_string()));
-                            }
+                        //TODO: Do we need to tell the user if the validating the target errors?
+                        if is_valid_target(file.path(), language_option).unwrap_or(false) {
+                            acc.push(Ok(file.path().display().to_string()));
                         } else {
-                            acc.append(&mut walk(fs::read_dir(file.path()), directory)?);
+                            acc.append(&mut walk(fs::read_dir(file.path()), language_option)?);
                         }
                         acc
                     }
@@ -84,7 +157,7 @@ pub fn get_paths_to_delete(path: impl Into<PathBuf>, directory: &DirectoryEnum) 
         )
     }
 
-    walk(fs::read_dir(path.into()), directory)
+    walk(fs::read_dir(path.into()), language_option)
 }
 
 pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {

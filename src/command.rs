@@ -11,7 +11,7 @@ pub enum Command {
 #[derive(Debug, StructOpt)]
 pub struct Args {
     /// rust | node
-    pub language: LanguageEnum,
+    pub language_input: String,
     /// Caution! If set it will wipe all folders found! Unset by default
     #[structopt(short, long)]
     pub wipe: bool,

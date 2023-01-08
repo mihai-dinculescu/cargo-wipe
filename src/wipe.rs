@@ -1,11 +1,15 @@
+use anyhow::{anyhow, Error};
 use std::fs;
 use std::io;
 use std::path::PathBuf;
 use std::{env, fmt::Display};
 use yansi::Paint;
 
-use crate::command::DirectoryEnum;
-use crate::command::{Args, LanguageEnum};
+use crate::command::Args;
+use crate::configuration::config::Config;
+use crate::configuration::file_util::load_config;
+use crate::configuration::file_util::save_config;
+use crate::configuration::language_option::LanguageOption;
 use crate::dir_helpers::{dir_size, get_paths_to_delete, DirInfo};
 
 pub const SPACING_FILES: usize = 12;
@@ -16,7 +20,7 @@ pub const SPACING_PATH: usize = 9;
 pub struct WipeParams {
     pub wipe: bool,
     pub path: PathBuf,
-    pub language: LanguageEnum,
+    pub language_input: String,
     pub ignores: Vec<PathBuf>,
 }
 
@@ -27,7 +31,7 @@ impl WipeParams {
         Ok(Self {
             wipe: args.wipe,
             path,
-            language: args.language.clone(),
+            language_input: args.language_input.clone(),
             ignores: args.ignores.clone(),
         })
     }
@@ -40,6 +44,7 @@ where
 {
     stdout: &'a mut W,
     params: &'a WipeParams,
+    config: Config,
     previous_info: Option<DirInfo>,
     wipe_info: Option<DirInfo>,
     ignore_info: Option<DirInfo>,
@@ -50,36 +55,66 @@ where
     W: io::Write,
 {
     pub fn new(stdout: &'a mut W, params: &'a WipeParams) -> Self {
+        let config = match load_config() {
+            Ok(config) => config,
+            Err(e) => {
+                write!(
+                    stdout,
+                    "{} {} {}\n",
+                    Paint::yellow("[WARNING]").bold(),
+                    "Error loading config! Will generate default config. Error: ",
+                    e
+                )
+                .expect("Couldn't write to stdout!");
+                let new_config = Config::default();
+                let save_result = save_config(&new_config);
+
+                if let Err(e) = save_result {
+                    write!(
+                        stdout,
+                        "{} {} {}\n",
+                        Paint::red("[ERROR]").bold(),
+                        "Error saving generated config! Error: ",
+                        e
+                    )
+                    .expect("Couldn't write to stdout!");
+                }
+
+                new_config
+            }
+        };
+
         Self {
             stdout,
             params,
+            config,
             previous_info: None,
             wipe_info: None,
             ignore_info: None,
         }
     }
 
-    pub fn run(&mut self) -> io::Result<()> {
-        self.write_header()?;
-        self.write_content()?;
+    pub fn run(&mut self) -> Result<(), Error> {
+        let language_option = self.write_assert_language_option()?.clone();
+
+        self.write_header(&language_option)?;
+        self.write_content(&language_option)?;
         self.write_footer()?;
 
         Ok(())
     }
 
-    fn write_header(&mut self) -> io::Result<()> {
+    fn write_header(&mut self, language_option: &LanguageOption) -> Result<(), anyhow::Error> {
         if self.params.wipe {
             write!(self.stdout, "{}", Paint::red("[WIPING]").bold())?;
         } else {
             write!(self.stdout, "{}", Paint::green("[DRY RUN]").bold())?;
         }
 
-        let directory: DirectoryEnum = self.params.language.clone().into();
-
         writeln!(
             self.stdout,
             r#" Recursively searching for all "{}" folders in {}..."#,
-            Paint::cyan(&directory),
+            Paint::cyan(language_option),
             Paint::cyan(self.params.path.display()),
         )?;
 
@@ -88,9 +123,8 @@ where
         Ok(())
     }
 
-    fn write_content(&mut self) -> io::Result<()> {
-        let directory: DirectoryEnum = self.params.language.clone().into();
-        let paths_to_delete = get_paths_to_delete(&self.params.path, &directory)?;
+    fn write_content(&mut self, language_option: &LanguageOption) -> io::Result<()> {
+        let paths_to_delete = get_paths_to_delete(&self.params.path, &language_option)?;
         let paths_to_delete = paths_to_delete
             .iter()
             .filter_map(|p| match p {
@@ -254,7 +288,7 @@ where
                 writeln!(
                     self.stdout,
                     "Run {} to wipe all folders found. {}",
-                    Paint::red(format!("cargo wipe {} -w", self.params.language)),
+                    Paint::red(format!("cargo wipe {} -w", self.params.language_input)),
                     Paint::red("USE WITH CAUTION!")
                 )?;
             } else {
@@ -311,5 +345,21 @@ where
         )?;
 
         Ok(())
+    }
+
+    fn write_assert_language_option(&mut self) -> Result<&LanguageOption, Error> {
+        let language_option: Option<&LanguageOption> =
+            self.config.get_option(&self.params.language_input);
+
+        if language_option.is_none() {
+            writeln!(
+                self.stdout,
+                r#" Could not find language option "{}" in config. Please add it to the config file."#,
+                Paint::red(&self.params.language_input),
+            )?;
+            return Err(anyhow!("Could not find language option in config"));
+        }
+
+        Ok(language_option.unwrap())
     }
 }

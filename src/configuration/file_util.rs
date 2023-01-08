@@ -30,15 +30,18 @@ pub fn save_to_config(path: PathBuf, config: &Config) -> Result<(), anyhow::Erro
 }
 
 pub fn get_config_path() -> Result<PathBuf, anyhow::Error> {
-    let config_path = BaseDirs::new()
+    let config_dir = BaseDirs::new()
         .ok_or(anyhow::anyhow!(
             "Could not get base directories, can not load configuration!"
         ))?
         .config_dir()
-        .join("cargo-wipe")
-        .join("config.json");
+        .join("cargo-wipe");
 
-    Ok(config_path)
+    std::fs::create_dir_all(&config_dir)?;
+
+    let config_filepath = config_dir.join("config.json");
+
+    Ok(config_filepath)
 }
 
 pub fn save_config(config: &Config) -> Result<(), anyhow::Error> {
