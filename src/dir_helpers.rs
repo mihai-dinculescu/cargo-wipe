@@ -51,10 +51,6 @@ fn is_valid_target(target_path: PathBuf, language_option: &LanguageOption) -> Re
         .map(|file_name| language_option.target_folder_regexp.is_match(file_name))
         .unwrap_or(false);
 
-    if true {
-        println!("Target: {:?} is match: {target_is_match}", target_path);
-    }
-
     if !target_is_match {
         return Ok(false);
     }
