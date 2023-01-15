@@ -122,7 +122,7 @@ where
             .collect::<Vec<_>>();
 
         for path in paths_to_delete {
-            let dir_info = dir_size(&path);
+            let dir_info = dir_size(path);
 
             let ignored = paths_ignored
                 .iter()
@@ -133,7 +133,7 @@ where
                     dir_info.file_count_formatted(),
                     dir_info.size_formatted_mb(),
                     "",
-                    &path,
+                    path,
                 )?;
 
                 if ignored {
@@ -145,7 +145,7 @@ where
                     wipe_info.size += dir_info.size;
                 }
             } else {
-                self.write_spaced_line("?", "?", "", &path)?;
+                self.write_spaced_line("?", "?", "", path)?;
             }
 
             if ignored {
