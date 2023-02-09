@@ -154,7 +154,7 @@ where
                 let r = fs::remove_dir_all(path);
 
                 if let Err(e) = r {
-                    write!(self.stdout, " {}", Paint::red(&format!("[{}]", e)))?;
+                    write!(self.stdout, " {}", Paint::red(&format!("[{e}]")))?;
                 }
             }
 
@@ -278,14 +278,7 @@ where
     ) -> io::Result<()> {
         write!(
             self.stdout,
-            r#"{:>files$}{:>size$}{:>path$}{}"#,
-            column_1,
-            column_2,
-            column_3,
-            column_4,
-            files = SPACING_FILES,
-            size = SPACING_SIZE,
-            path = SPACING_PATH,
+            r#"{column_1:>SPACING_FILES$}{column_2:>SPACING_SIZE$}{column_3:>SPACING_PATH$}{column_4}"#,
         )?;
 
         Ok(())
@@ -300,14 +293,7 @@ where
     ) -> io::Result<()> {
         writeln!(
             self.stdout,
-            r#"{:>files$}{:>size$}{:>path$}{}"#,
-            column_1,
-            column_2,
-            column_3,
-            column_4,
-            files = SPACING_FILES,
-            size = SPACING_SIZE,
-            path = SPACING_PATH,
+            r#"{column_1:>SPACING_FILES$}{column_2:>SPACING_SIZE$}{column_3:>SPACING_PATH$}{column_4}"#,
         )?;
 
         Ok(())

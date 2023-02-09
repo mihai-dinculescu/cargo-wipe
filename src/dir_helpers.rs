@@ -34,8 +34,8 @@ impl DirInfo {
         let np = NumberPrefix::binary(self.size as f64);
 
         match np {
-            NumberPrefix::Prefixed(prefix, n) => format!("{:.2} {}B", n, prefix),
-            NumberPrefix::Standalone(bytes) => format!("{} bytes", bytes),
+            NumberPrefix::Prefixed(prefix, n) => format!("{n:.2} {prefix}B"),
+            NumberPrefix::Standalone(bytes) => format!("{bytes} bytes"),
         }
     }
 }

@@ -36,7 +36,7 @@ mod wipe_permissions_tests {
         Wipe::new(&mut buff, &params).run().unwrap();
 
         let output = std::str::from_utf8(buff.get_ref()).unwrap();
-        println!("{}", output);
+        println!("{output}");
 
         // hits should be listed and wiped if wipe is true
         for path in &test_run.hits {
@@ -84,7 +84,7 @@ mod wipe_permissions_tests {
         Wipe::new(&mut buff, &params).run().unwrap();
 
         let output = std::str::from_utf8(buff.get_ref()).unwrap();
-        println!("{}", output);
+        println!("{output}");
 
         // hits should be listed and wiped if wipe is true
         for path in &test_run.hits {

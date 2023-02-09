@@ -28,7 +28,7 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
     Wipe::new(&mut buff, &params).run().unwrap();
 
     let output = std::str::from_utf8(buff.get_ref()).unwrap();
-    println!("{}", output);
+    println!("{output}");
 
     // header
     let expected = format!("{}", Paint::green("[DRY RUN]").bold());
@@ -108,7 +108,7 @@ fn run_no_hits(language: LanguageEnum, wipe: bool) {
     Wipe::new(&mut buff, &params).run().unwrap();
 
     let output = std::str::from_utf8(buff.get_ref()).unwrap();
-    println!("{}", output);
+    println!("{output}");
 
     // body
     let expected = format!("{}", Paint::cyan("Files #"));
@@ -163,7 +163,7 @@ fn run_with_ignores(language: LanguageEnum, wipe: bool) {
 
     let output = std::str::from_utf8(buff.get_ref()).unwrap();
     let lines = output.lines();
-    println!("{}", output);
+    println!("{output}");
 
     // body
     // hits should be listed and wiped if wipe is true

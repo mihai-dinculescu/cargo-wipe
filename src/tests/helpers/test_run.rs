@@ -153,7 +153,7 @@ impl TestRun {
             .take(16)
             .map(char::from)
             .collect();
-        let name_inner = format!("{}_{}", language, name_inner);
+        let name_inner = format!("{language}_{name_inner}");
 
         let path = self
             .path
