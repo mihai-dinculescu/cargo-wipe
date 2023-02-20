@@ -6,11 +6,11 @@ use crate::wipe::WipeParams;
 
 #[parameterized(
     args = {
-        Args { wipe: false, language: LanguageEnum::NodeModules, ignores: Vec::new() },
-        Args { wipe: true, language: LanguageEnum::NodeModules, ignores: Vec::new() },
-        Args { wipe: false, language: LanguageEnum::Node, ignores: Vec::new() },
-        Args { wipe: true, language: LanguageEnum::Node, ignores: Vec::new() },
-        Args { wipe: true, language: LanguageEnum::Node, ignores: vec![PathBuf::from("example/path")] },
+        Args { wipe: false, language_input: LanguageEnum::NodeModules, ignores: Vec::new() },
+        Args { wipe: true, language_input: LanguageEnum::NodeModules, ignores: Vec::new() },
+        Args { wipe: false, language_input: LanguageEnum::Node, ignores: Vec::new() },
+        Args { wipe: true, language_input: LanguageEnum::Node, ignores: Vec::new() },
+        Args { wipe: true, language_input: LanguageEnum::Node, ignores: vec![PathBuf::from("example/path")] },
     },
 )]
 fn node(args: Args) {
@@ -21,7 +21,7 @@ fn node(args: Args) {
         WipeParams {
             wipe: args.wipe,
             path: std::env::current_dir().unwrap(),
-            language: args.language,
+            language: args.language_input,
             ignores: args.ignores,
         }
     );
@@ -29,11 +29,11 @@ fn node(args: Args) {
 
 #[parameterized(
     args = {
-        Args { wipe: false, language: LanguageEnum::Target, ignores: Vec::new() },
-        Args { wipe: true, language: LanguageEnum::Target, ignores: Vec::new() },
-        Args { wipe: false, language: LanguageEnum::Rust, ignores: Vec::new() },
-        Args { wipe: true, language: LanguageEnum::Rust, ignores: Vec::new() },
-        Args { wipe: true, language: LanguageEnum::Rust, ignores: vec![PathBuf::from("example/path")] },
+        Args { wipe: false, language_input: LanguageEnum::Target, ignores: Vec::new() },
+        Args { wipe: true, language_input: LanguageEnum::Target, ignores: Vec::new() },
+        Args { wipe: false, language_input: LanguageEnum::Rust, ignores: Vec::new() },
+        Args { wipe: true, language_input: LanguageEnum::Rust, ignores: Vec::new() },
+        Args { wipe: true, language_input: LanguageEnum::Rust, ignores: vec![PathBuf::from("example/path")] },
     },
 )]
 fn rust(args: Args) {
@@ -44,7 +44,7 @@ fn rust(args: Args) {
         WipeParams {
             wipe: args.wipe,
             path: std::env::current_dir().unwrap(),
-            language: args.language,
+            language: args.language_input,
             ignores: args.ignores,
         }
     );
