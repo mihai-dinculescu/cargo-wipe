@@ -14,7 +14,7 @@ repository = "https://github.com/mihai-dinculescu/cargo-wipe"
 anyhow = "1.0"
 num-format = "0.4"
 number_prefix = "0.4"
-structopt = "0.3"
+clap = { version = "3.0", features = ["derive"] }
 yansi = "0.5"
 
 [dev-dependencies]

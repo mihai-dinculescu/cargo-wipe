@@ -1,10 +1,13 @@
 use std::{fmt, io, path, str};
-use structopt::StructOpt;
+
+use clap::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(bin_name = "cargo")]
 pub enum Command {
-    /// Recursively finds and optionally wipes all <target> or <node_modules> folders that are found in the current path. Add the `-w` flag to wipe all folders found. USE WITH CAUTION!
+    /// Recursively finds and optionally wipes all <target> or <node_modules>
+    /// folders that are found in the current path. Add the `-w` flag to wipe
+    /// all folders found. USE WITH CAUTION!
     Wipe(Args),
 }
 

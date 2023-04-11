@@ -1,12 +1,15 @@
 use std::io::stdout;
-use structopt::StructOpt;
+
+use clap::StructOpt;
 
 pub mod command;
 pub mod dir_helpers;
 pub mod wipe;
 
-use crate::command::Command;
-use crate::wipe::{Wipe, WipeParams};
+use crate::{
+    command::Command,
+    wipe::{Wipe, WipeParams},
+};
 
 #[cfg(test)]
 mod tests;
