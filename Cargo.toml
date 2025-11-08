@@ -1,7 +1,7 @@
 [package]
 name = "cargo-wipe"
 version = "0.3.3"
-edition = "2021"
+edition = "2024"
 license = "MIT"
 authors = ["Mihai Dinculescu <mihai.dinculescu@outlook.com>"]
 description = "recursively wipe target and node_modules folders"

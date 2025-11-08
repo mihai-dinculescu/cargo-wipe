@@ -1,5 +1,5 @@
 use rand::distributions::Alphanumeric;
-use rand::{prelude::ThreadRng, thread_rng, Rng};
+use rand::{Rng, prelude::ThreadRng, thread_rng};
 use std::path::{Path, PathBuf};
 
 use crate::command::LanguageEnum;

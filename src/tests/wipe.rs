@@ -5,7 +5,7 @@ use yansi::Paint;
 
 use crate::command::LanguageEnum;
 use crate::tests::helpers::test_run::TestRun;
-use crate::wipe::{Wipe, WipeParams, SPACING_FILES, SPACING_SIZE};
+use crate::wipe::{SPACING_FILES, SPACING_SIZE, Wipe, WipeParams};
 
 #[parameterized(
     language = {

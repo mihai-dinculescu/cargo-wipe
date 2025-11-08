@@ -6,7 +6,7 @@ use yansi::Paint;
 
 use crate::command::DirectoryEnum;
 use crate::command::{Args, LanguageEnum};
-use crate::dir_helpers::{dir_size, get_paths_to_delete, DirInfo};
+use crate::dir_helpers::{DirInfo, dir_size, get_paths_to_delete};
 
 pub const SPACING_FILES: usize = 12;
 pub const SPACING_SIZE: usize = 18;
@@ -93,10 +93,7 @@ where
         let paths_to_delete = get_paths_to_delete(&self.params.path, &directory)?;
         let paths_to_delete = paths_to_delete
             .iter()
-            .filter_map(|p| match p {
-                Ok(item) => Some(item),
-                _ => None,
-            })
+            .filter_map(|p| p.as_ref().ok())
             .collect::<Vec<_>>();
 
         if !paths_to_delete.is_empty() {
