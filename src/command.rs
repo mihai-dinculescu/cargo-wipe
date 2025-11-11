@@ -1,9 +1,10 @@
-use std::{fmt, io, path, str};
+use std::path::PathBuf;
+use std::{fmt, io, str};
 
-use clap::StructOpt;
+use clap::{Parser, ValueEnum, arg, command};
 
-#[derive(Debug, StructOpt)]
-#[structopt(bin_name = "cargo")]
+#[derive(Debug, Parser)]
+#[command(name = "cargo", bin_name = "cargo")]
 pub enum Command {
     /// Recursively finds and optionally wipes all <target> or <node_modules>
     /// folders that are found in the current path. Add the `-w` flag to wipe
@@ -11,21 +12,26 @@ pub enum Command {
     Wipe(Args),
 }
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
+#[command(
+    version = env!("CARGO_PKG_VERSION"),
+    bin_name = "cargo",
+    help_template = "{before-help}{name} {version}\n{author-with-newline}{about-with-newline}\n{usage-heading} {usage}\n\n{all-args}{after-help}",
+)]
 pub struct Args {
-    /// rust | node
+    /// Language to target
     pub language: LanguageEnum,
     /// Caution! If set it will wipe all folders found! Unset by default
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub wipe: bool,
     /// Absolute paths to ignore
-    #[structopt(short, long, parse(from_os_str))]
-    pub ignores: Vec<path::PathBuf>,
+    #[arg(short, long, value_parser)]
+    pub ignores: Vec<PathBuf>,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone, StructOpt)]
+#[derive(Debug, PartialEq, Eq, Clone, ValueEnum)]
 pub enum LanguageEnum {
-    #[structopt(name = "node_modules")]
+    #[value(name = "node_modules")]
     NodeModules,
     Node,
     Target,

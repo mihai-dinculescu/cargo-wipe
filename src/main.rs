@@ -1,6 +1,6 @@
 use std::io::stdout;
 
-use clap::StructOpt;
+use clap::Parser;
 
 pub mod command;
 pub mod dir_helpers;
@@ -16,7 +16,7 @@ mod tests;
 
 fn main() -> anyhow::Result<()> {
     let mut stdout = stdout();
-    let command = Command::from_args();
+    let command = Command::parse();
 
     match command {
         Command::Wipe(args) => {
