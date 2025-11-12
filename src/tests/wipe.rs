@@ -31,7 +31,7 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
     println!("{output}");
 
     // header
-    let expected = format!("{}","[DRY RUN]".green().bold());
+    let expected = format!("{}", "[DRY RUN]".green().bold());
     assert_eq!(output.contains(&expected), !wipe);
 
     let expected = format!("{}", "[WIPING]".red().bold());
@@ -80,7 +80,7 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
     } else {
         let expected = format!(
             "Run {} to wipe all folders found. {}",
-           format!("cargo wipe {} -w", params.language).red(),
+            format!("cargo wipe {} -w", params.language).red(),
             "USE WITH CAUTION!".red()
         );
         assert!(output.contains(&expected));

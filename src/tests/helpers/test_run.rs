@@ -1,5 +1,5 @@
-use rand::distributions::Alphanumeric;
-use rand::{Rng, prelude::ThreadRng, thread_rng};
+use rand::{Rng, prelude::ThreadRng, rng};
+use rand_distr::Alphanumeric;
 use std::path::{Path, PathBuf};
 
 use crate::command::LanguageEnum;
@@ -166,7 +166,7 @@ impl TestRun {
     }
 
     pub fn generate_parent() -> Self {
-        let mut rng = thread_rng();
+        let mut rng = rng();
         let name: String = (&mut rng)
             .sample_iter(&Alphanumeric)
             .take(16)
