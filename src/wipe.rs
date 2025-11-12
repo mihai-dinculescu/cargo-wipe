@@ -69,9 +69,9 @@ where
 
     fn write_header(&mut self) -> io::Result<()> {
         if self.params.wipe {
-            write!(self.stdout, "{}", Paint::red("[WIPING]").bold())?;
+            write!(self.stdout, "{}", "[WIPING]".red().bold())?;
         } else {
-            write!(self.stdout, "{}", Paint::green("[DRY RUN]").bold())?;
+            write!(self.stdout, "{}", "[DRY RUN]".green().bold())?;
         }
 
         let directory: DirectoryEnum = self.params.language.clone().into();
@@ -79,8 +79,8 @@ where
         writeln!(
             self.stdout,
             r#" Recursively searching for all "{}" folders in {}..."#,
-            Paint::cyan(&directory),
-            Paint::cyan(self.params.path.display()),
+            &directory.cyan(),
+            self.params.path.display().cyan(),
         )?;
 
         self.stdout.flush()?;
@@ -99,12 +99,7 @@ where
         if !paths_to_delete.is_empty() {
             writeln!(self.stdout)?;
 
-            self.writeln_spaced_line(
-                Paint::cyan("Files #"),
-                Paint::cyan("Size (MB)"),
-                "",
-                Paint::cyan("Path"),
-            )?;
+            self.writeln_spaced_line("Files #".cyan(), "Size (MB)".cyan(), "", "Path".cyan())?;
 
             self.previous_info = Some(dir_size(&self.params.path)?);
         }
@@ -146,12 +141,12 @@ where
             }
 
             if ignored {
-                write!(self.stdout, " {}", Paint::yellow("[Ignored]"))?;
+                write!(self.stdout, " {}", "[Ignored]".yellow())?;
             } else if self.params.wipe {
                 let r = fs::remove_dir_all(path);
 
                 if let Err(e) = r {
-                    write!(self.stdout, " {}", Paint::red(&format!("[{e}]")))?;
+                    write!(self.stdout, " {}", format!("[{e}]").red())?;
                 }
             }
 
@@ -178,10 +173,10 @@ where
         };
 
         self.writeln_spaced_line(
-            Paint::cyan("Files #"),
-            Paint::cyan("Size"),
+            "Files #".cyan(),
+            "Size".cyan(),
             "",
-            Paint::cyan(self.params.path.display()),
+            self.params.path.display().cyan(),
         )?;
 
         let label = if self.params.wipe {
@@ -191,18 +186,18 @@ where
         };
 
         self.writeln_spaced_line(
-            Paint::default(previous_info.file_count_formatted()),
-            Paint::default(previous_info.size_formatted_flex()),
+            previous_info.file_count_formatted(),
+            previous_info.size_formatted_flex(),
             "",
-            Paint::default(label),
+            label,
         )?;
 
         if ignore_info.dir_count > 0 {
             self.writeln_spaced_line(
-                Paint::yellow(ignore_info.file_count_formatted()),
-                Paint::yellow(ignore_info.size_formatted_flex()),
+                ignore_info.file_count_formatted().yellow(),
+                ignore_info.size_formatted_flex().yellow(),
                 "",
-                Paint::yellow("Ignored"),
+                "Ignored".yellow(),
             )?;
         }
 
@@ -213,10 +208,10 @@ where
         };
 
         self.writeln_spaced_line(
-            Paint::red(wipe_info.file_count_formatted()),
-            Paint::red(wipe_info.size_formatted_flex()),
+            wipe_info.file_count_formatted().red(),
+            wipe_info.size_formatted_flex().red(),
             "",
-            Paint::red(label),
+            label.red(),
         )?;
 
         let label = if self.params.wipe {
@@ -226,10 +221,10 @@ where
         };
 
         self.writeln_spaced_line(
-            Paint::green(after.file_count_formatted()),
-            Paint::green(after.size_formatted_flex()),
+            after.file_count_formatted().green(),
+            after.size_formatted_flex().green(),
             "",
-            Paint::green(label),
+            label.green(),
         )?;
 
         writeln!(self.stdout)?;
@@ -251,14 +246,14 @@ where
                 writeln!(
                     self.stdout,
                     "Run {} to wipe all folders found. {}",
-                    Paint::red(format!("cargo wipe {} -w", self.params.language)),
-                    Paint::red("USE WITH CAUTION!")
+                    format!("cargo wipe {} -w", self.params.language).red(),
+                    "USE WITH CAUTION!".red()
                 )?;
             } else {
-                writeln!(self.stdout, "{}", Paint::green("All clear!"))?
+                writeln!(self.stdout, "{}", "All clear!".green())?
             }
         } else {
-            writeln!(self.stdout, "{}", Paint::green("Nothing found!"))?
+            writeln!(self.stdout, "{}", "Nothing found!".green())?
         }
 
         self.stdout.flush()?;

@@ -31,13 +31,13 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
     println!("{output}");
 
     // header
-    let expected = format!("{}", Paint::green("[DRY RUN]").bold());
+    let expected = format!("{}","[DRY RUN]".green().bold());
     assert_eq!(output.contains(&expected), !wipe);
 
-    let expected = format!("{}", Paint::red("[WIPING]").bold());
+    let expected = format!("{}", "[WIPING]".red().bold());
     assert_eq!(output.contains(&expected), wipe);
 
-    let expected = format!(r#""{}""#, Paint::cyan(language));
+    let expected = format!(r#""{}""#, language.cyan());
     assert!(output.contains(&expected));
 
     // body
@@ -56,32 +56,32 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
     }
 
     // summary should be displayed
-    let expected = format!("{:>files$}", Paint::cyan("Files #"), files = SPACING_FILES);
+    let expected = format!("{:>files$}", "Files #".cyan(), files = SPACING_FILES);
     let output = output.replacen(&expected, "", 1);
     assert!(output.contains(&expected));
 
-    let expected = format!("{:>size$}", Paint::cyan("Size (MB)"), size = SPACING_SIZE);
+    let expected = format!("{:>size$}", "Size (MB)".cyan(), size = SPACING_SIZE);
     let output = output.replacen(&expected, "", 1);
 
-    let expected = format!("{:>size$}", Paint::cyan("Size"), size = SPACING_SIZE);
+    let expected = format!("{:>size$}", "Size".cyan(), size = SPACING_SIZE);
     assert!(output.contains(&expected));
 
-    let expected = format!("{}", Paint::cyan(test_run.path.display()));
+    let expected = format!("{}", test_run.path.display().cyan());
     let output = &output.replacen(&expected, "", 1);
     assert!(output.contains(&expected));
 
-    let expected = format!("{}", Paint::yellow("Ignored"));
+    let expected = format!("{}", "Ignored".yellow());
     assert!(!output.contains(&expected));
 
     // footer
     if wipe {
-        let expected = format!("{}", Paint::green("All clear!"));
+        let expected = format!("{}", "All clear!".green());
         assert!(output.contains(&expected));
     } else {
         let expected = format!(
             "Run {} to wipe all folders found. {}",
-            Paint::red(format!("cargo wipe {} -w", params.language)),
-            Paint::red("USE WITH CAUTION!")
+           format!("cargo wipe {} -w", params.language).red(),
+            "USE WITH CAUTION!".red()
         );
         assert!(output.contains(&expected));
     }
@@ -111,33 +111,33 @@ fn run_no_hits(language: LanguageEnum, wipe: bool) {
     println!("{output}");
 
     // body
-    let expected = format!("{}", Paint::cyan("Files #"));
+    let expected = format!("{}", "Files #".cyan());
     assert!(!output.contains(&expected));
 
-    let expected = format!("{}", Paint::cyan("Size"));
+    let expected = format!("{}", "Size".cyan());
     assert!(!output.contains(&expected));
 
-    let expected = format!("{}", Paint::cyan(test_run.path.display()));
+    let expected = format!("{}", test_run.path.display().cyan());
     let output = &output.replacen(&expected, "", 1);
     assert!(!output.contains(&expected));
 
     // summary should not be displayed
-    let expected = format!("{:>files$}", Paint::cyan("Files #"), files = SPACING_FILES);
+    let expected = format!("{:>files$}", "Files #".cyan(), files = SPACING_FILES);
     let output = output.replacen(&expected, "", 1);
     assert!(!output.contains(&expected));
 
-    let expected = format!("{:>size$}", Paint::cyan("Size (MB)"), size = SPACING_SIZE);
+    let expected = format!("{:>size$}", "Size (MB)".cyan(), size = SPACING_SIZE);
     let output = output.replacen(&expected, "", 1);
 
-    let expected = format!("{:>size$}", Paint::cyan("Size"), size = SPACING_SIZE);
+    let expected = format!("{:>size$}", "Size".cyan(), size = SPACING_SIZE);
     assert!(!output.contains(&expected));
 
-    let expected = format!("{}", Paint::cyan(test_run.path.display()));
+    let expected = format!("{}", test_run.path.display().cyan());
     let output = &output.replacen(&expected, "", 1);
     assert!(!output.contains(&expected));
 
     // footer
-    let expected = format!("{}", Paint::green("Nothing found!"));
+    let expected = format!("{}", "Nothing found!".green());
     assert!(output.contains(&expected));
 }
 
@@ -205,6 +205,6 @@ fn run_with_ignores(language: LanguageEnum, wipe: bool) {
     }
 
     // summary should be displayed
-    let expected = format!("{}", Paint::yellow("Ignored"));
+    let expected = format!("{}", "Ignored".yellow());
     assert!(output.contains(&expected));
 }
