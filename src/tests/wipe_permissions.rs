@@ -6,7 +6,8 @@ mod wipe_permissions_tests {
 
     use crate::command::LanguageEnum;
     use crate::tests::helpers::test_run::TestRun;
-    use crate::wipe::{Wipe, WipeParams};
+    use crate::wipe::Wipe;
+    use crate::wipe_params::WipeParams;
 
     #[parameterized(
         language = {

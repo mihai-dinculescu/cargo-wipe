@@ -2,7 +2,7 @@ use parameterized::parameterized;
 use std::path::PathBuf;
 
 use crate::command::{Args, LanguageEnum};
-use crate::wipe::WipeParams;
+use crate::wipe_params::WipeParams;
 
 #[parameterized(
     args = {

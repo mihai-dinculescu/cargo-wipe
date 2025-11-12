@@ -5,11 +5,12 @@ use clap::Parser;
 pub mod command;
 pub mod dir_helpers;
 pub mod wipe;
+pub mod wipe_params;
+pub mod writer;
 
-use crate::{
-    command::Command,
-    wipe::{Wipe, WipeParams},
-};
+use crate::command::Command;
+use crate::wipe::Wipe;
+use crate::wipe_params::WipeParams;
 
 #[cfg(test)]
 mod tests;

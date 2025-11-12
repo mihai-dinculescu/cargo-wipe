@@ -1,11 +1,13 @@
 use parameterized::parameterized;
 use std::path::PathBuf;
 use std::{io::Cursor, println};
-use yansi::Paint;
+use yansi::Paint as _;
 
 use crate::command::LanguageEnum;
 use crate::tests::helpers::test_run::TestRun;
-use crate::wipe::{SPACING_FILES, SPACING_SIZE, Wipe, WipeParams};
+use crate::wipe::Wipe;
+use crate::wipe_params::WipeParams;
+use crate::writer::{SPACING_FILES, SPACING_SIZE};
 
 #[parameterized(
     language = {

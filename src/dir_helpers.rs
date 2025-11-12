@@ -3,7 +3,9 @@ use number_prefix::NumberPrefix;
 use std::path::PathBuf;
 use std::{fs, io};
 
-use crate::command::DirectoryEnum;
+use crate::command::{DirectoryEnum, LanguageEnum};
+
+pub type PathsResult = io::Result<Vec<Result<String, io::Error>>>;
 
 #[derive(Debug, Copy, Clone)]
 pub struct DirInfo {
@@ -38,90 +40,90 @@ impl DirInfo {
             NumberPrefix::Standalone(bytes) => format!("{bytes} bytes"),
         }
     }
-}
 
-fn is_valid_target(path: PathBuf, directory: &DirectoryEnum) -> bool {
-    if directory == &DirectoryEnum::Target {
-        let file_path = path.join(".rustc_info.json");
-        return file_path.exists();
+    fn is_valid_target(path: PathBuf, directory: &DirectoryEnum) -> bool {
+        if directory == &DirectoryEnum::Target {
+            let file_path = path.join(".rustc_info.json");
+            return file_path.exists();
+        }
+
+        true
     }
 
-    true
-}
+    pub fn get_paths_to_delete(path: impl Into<PathBuf>, language: &LanguageEnum) -> PathsResult {
+        let directory: DirectoryEnum = language.clone().into();
 
-pub type PathsResult = io::Result<Vec<Result<String, io::Error>>>;
-
-pub fn get_paths_to_delete(path: impl Into<PathBuf>, directory: &DirectoryEnum) -> PathsResult {
-    fn walk(dir: io::Result<fs::ReadDir>, directory: &DirectoryEnum) -> PathsResult {
-        let mut dir = match dir {
-            Ok(dir) => dir,
-            Err(e) => {
-                return Ok(vec![Err(e)]);
-            }
-        };
-
-        dir.try_fold(
-            Vec::new(),
-            |mut acc: Vec<Result<String, io::Error>>, file| {
-                let file = file?;
-
-                let size = match file.metadata() {
-                    Ok(data) if data.is_dir() => {
-                        if file.file_name() == directory.to_string()[..] {
-                            if is_valid_target(file.path(), directory) {
-                                acc.push(Ok(file.path().display().to_string()));
-                            }
-                        } else {
-                            acc.append(&mut walk(fs::read_dir(file.path()), directory)?);
-                        }
-                        acc
-                    }
-                    _ => acc,
-                };
-
-                Ok(size)
-            },
-        )
-    }
-
-    walk(fs::read_dir(path.into()), directory)
-}
-
-pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {
-    fn walk(dir: io::Result<fs::ReadDir>) -> io::Result<DirInfo> {
-        let mut dir = match dir {
-            Ok(dir) => dir,
-            Err(_) => {
-                // Return empty stats for unreadable directories instead of failing
-                return Ok(DirInfo::new(0, 0, 0));
-            }
-        };
-
-        dir.try_fold(DirInfo::new(0, 0, 0), |acc, file| {
-            let file = file?;
-
-            let info = match file.metadata() {
-                // For directories: count 1 directory + recursively count its contents
-                Ok(data) if data.is_dir() => {
-                    let sub_info = walk(fs::read_dir(file.path()))?;
-                    DirInfo::new(1 + sub_info.dir_count, sub_info.file_count, sub_info.size)
+        fn walk(dir: io::Result<fs::ReadDir>, directory: &DirectoryEnum) -> PathsResult {
+            let mut dir = match dir {
+                Ok(dir) => dir,
+                Err(e) => {
+                    return Ok(vec![Err(e)]);
                 }
-                // For files: count 1 file and its size in bytes
-                Ok(data) => DirInfo::new(0, 1, data.len() as usize),
-                // Skip entries we can't read metadata for
-                _ => DirInfo::new(0, 0, 0),
             };
 
-            // Accumulate counts from this entry with running totals
-            Ok(DirInfo::new(
-                acc.dir_count + info.dir_count,
-                acc.file_count + info.file_count,
-                acc.size + info.size,
-            ))
-        })
+            dir.try_fold(
+                Vec::new(),
+                |mut acc: Vec<Result<String, io::Error>>, file| {
+                    let file = file?;
+
+                    let size = match file.metadata() {
+                        Ok(data) if data.is_dir() => {
+                            if file.file_name() == directory.to_string()[..] {
+                                if DirInfo::is_valid_target(file.path(), directory) {
+                                    acc.push(Ok(file.path().display().to_string()));
+                                }
+                            } else {
+                                acc.append(&mut walk(fs::read_dir(file.path()), directory)?);
+                            }
+                            acc
+                        }
+                        _ => acc,
+                    };
+
+                    Ok(size)
+                },
+            )
+        }
+
+        walk(fs::read_dir(path.into()), &directory)
     }
 
-    walk(fs::read_dir(path.into()))
+    pub fn dir_size(path: impl Into<PathBuf>) -> io::Result<DirInfo> {
+        fn walk(dir: io::Result<fs::ReadDir>) -> io::Result<DirInfo> {
+            let mut dir = match dir {
+                Ok(dir) => dir,
+                Err(_) => {
+                    // Return empty stats for unreadable directories instead of failing
+                    return Ok(DirInfo::new(0, 0, 0));
+                }
+            };
+
+            dir.try_fold(DirInfo::new(0, 0, 0), |acc, file| {
+                let file = file?;
+
+                let info = match file.metadata() {
+                    // For directories: count 1 directory + recursively count its contents
+                    Ok(data) if data.is_dir() => {
+                        let sub_info = walk(fs::read_dir(file.path()))?;
+                        DirInfo::new(1 + sub_info.dir_count, sub_info.file_count, sub_info.size)
+                    }
+                    // For files: count 1 file and its size in bytes
+                    Ok(data) => DirInfo::new(0, 1, data.len() as usize),
+                    // Skip entries we can't read metadata for
+                    _ => DirInfo::new(0, 0, 0),
+                };
+
+                // Accumulate counts from this entry with running totals
+                Ok(DirInfo::new(
+                    acc.dir_count + info.dir_count,
+                    acc.file_count + info.file_count,
+                    acc.size + info.size,
+                ))
+            })
+        }
+
+        walk(fs::read_dir(path.into()))
+    }
 }
 
 #[cfg(test)]
