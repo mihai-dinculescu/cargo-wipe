@@ -70,7 +70,7 @@ where
                     ignore_info.dir_count += 1;
                     ignore_info.file_count += dir_info.file_count;
                     ignore_info.size += dir_info.size;
-                } else {
+                } else if error.is_none() {
                     wipe_info.file_count += dir_info.file_count;
                     wipe_info.size += dir_info.size;
                 }

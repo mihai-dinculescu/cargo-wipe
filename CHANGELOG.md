@@ -6,6 +6,10 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed an issue where folders that failed to delete were still counted as freed space.
+
 ## [v0.3.3] - 2022-08-22
 
 ### Changed
