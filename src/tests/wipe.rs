@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use std::{io::Cursor, println};
 use yansi::Paint as _;
 
-use crate::command::LanguageEnum;
+use crate::command::{DirectoryEnum, LanguageEnum};
 use crate::tests::helpers::test_run::TestRun;
 use crate::wipe::Wipe;
 use crate::wipe_params::WipeParams;
@@ -11,13 +11,14 @@ use crate::writer::{SPACING_FILES, SPACING_SIZE};
 
 #[parameterized(
     language = {
-        LanguageEnum::NodeModules, LanguageEnum::NodeModules,
-        LanguageEnum::Target, LanguageEnum::Target,
+        LanguageEnum::Node, LanguageEnum::Node,
+        LanguageEnum::Rust, LanguageEnum::Rust,
     },
     wipe = { false, true, false, true },
 )]
 fn run_with_hits(language: LanguageEnum, wipe: bool) {
     let test_run = TestRun::new(&language, 3, 0);
+    let directory: DirectoryEnum = (&language).into();
 
     let params = WipeParams {
         wipe,
@@ -39,7 +40,7 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
     let expected = format!("{}", "[WIPING]".red().bold());
     assert_eq!(output.contains(&expected), wipe);
 
-    let expected = format!(r#""{}""#, language.cyan());
+    let expected = format!(r#""{}""#, directory.cyan());
     assert!(output.contains(&expected));
 
     // body
@@ -91,8 +92,8 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
 
 #[parameterized(
     language = {
-        LanguageEnum::NodeModules, LanguageEnum::NodeModules,
-        LanguageEnum::Target, LanguageEnum::Target,
+        LanguageEnum::Node, LanguageEnum::Node,
+        LanguageEnum::Rust, LanguageEnum::Rust,
     },
     wipe = { false, true, false, true },
 )]
@@ -145,8 +146,8 @@ fn run_no_hits(language: LanguageEnum, wipe: bool) {
 
 #[parameterized(
     language = {
-        LanguageEnum::NodeModules, LanguageEnum::NodeModules,
-        LanguageEnum::Target, LanguageEnum::Target,
+        LanguageEnum::Node, LanguageEnum::Node,
+        LanguageEnum::Rust, LanguageEnum::Rust,
     },
     wipe = { false, true, false, true },
 )]

@@ -6,9 +6,9 @@ use clap::{Parser, ValueEnum, arg, command};
 #[derive(Debug, Parser)]
 #[command(name = "cargo", bin_name = "cargo")]
 pub enum Command {
-    /// Recursively finds and optionally wipes all <target> or <node_modules>
-    /// folders that are found in the current path. Add the `-w` flag to wipe
-    /// all folders found. USE WITH CAUTION!
+    /// Recursively finds and optionally wipes all "target" (Rust) or
+    /// "node_modules" (Node) folders that are found in the current path.
+    /// Add the `-w` flag to wipe all folders found. USE WITH CAUTION!
     Wipe(Args),
 }
 
@@ -31,10 +31,7 @@ pub struct Args {
 
 #[derive(Debug, PartialEq, Eq, Clone, ValueEnum)]
 pub enum LanguageEnum {
-    #[value(name = "node_modules")]
-    NodeModules,
     Node,
-    Target,
     Rust,
 }
 
@@ -49,13 +46,11 @@ impl str::FromStr for LanguageEnum {
 
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         match value.to_lowercase().trim() {
-            "node_modules" => Ok(LanguageEnum::NodeModules),
             "node" => Ok(LanguageEnum::Node),
-            "target" => Ok(LanguageEnum::Target),
             "rust" => Ok(LanguageEnum::Rust),
             _ => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Valid options are: rust | node",
+                "Valid options are: node | rust",
             )),
         }
     }
@@ -65,9 +60,7 @@ impl fmt::Display for LanguageEnum {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             LanguageEnum::Node => write!(f, "node"),
-            LanguageEnum::NodeModules => write!(f, "node_modules"),
             LanguageEnum::Rust => write!(f, "rust"),
-            LanguageEnum::Target => write!(f, "target"),
         }
     }
 }
@@ -76,9 +69,16 @@ impl From<LanguageEnum> for DirectoryEnum {
     fn from(language: LanguageEnum) -> Self {
         match language {
             LanguageEnum::Node => DirectoryEnum::NodeModules,
-            LanguageEnum::NodeModules => DirectoryEnum::NodeModules,
             LanguageEnum::Rust => DirectoryEnum::Target,
-            LanguageEnum::Target => DirectoryEnum::Target,
+        }
+    }
+}
+
+impl From<&LanguageEnum> for DirectoryEnum {
+    fn from(language: &LanguageEnum) -> Self {
+        match language {
+            LanguageEnum::Node => DirectoryEnum::NodeModules,
+            LanguageEnum::Rust => DirectoryEnum::Target,
         }
     }
 }

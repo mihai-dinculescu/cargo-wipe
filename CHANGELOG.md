@@ -10,6 +10,10 @@ file. This change log follows the conventions of
 
 - Fixed an issue where folders that failed to delete were still counted as freed space.
 
+### Removed
+
+- Removed the previously deprecated `target` and `node_modules` aliases. Use the `rust` and `node` aliases instead.
+
 ## [v0.3.3] - 2022-08-22
 
 ### Changed

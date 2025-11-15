@@ -6,20 +6,16 @@ use crate::command::{DirectoryEnum, LanguageEnum};
 
 #[parameterized(
     language_string = {
-        "node_modules",
         "node",
-        "target",
         "rust",
-        "TARGET",
-        "target ",
+        "RUST",
+        "ruSt ",
     },
     language_enum = {
-        LanguageEnum::NodeModules,
         LanguageEnum::Node,
-        LanguageEnum::Target,
         LanguageEnum::Rust,
-        LanguageEnum::Target,
-        LanguageEnum::Target,
+        LanguageEnum::Rust,
+        LanguageEnum::Rust,
     },
 )]
 fn language_string_to_enum(language_string: &str, language_enum: LanguageEnum) {
@@ -32,7 +28,7 @@ fn language_string_to_enum(language_string: &str, language_enum: LanguageEnum) {
 #[parameterized(
     language_string = {
         "node-modules",
-        "targett",
+        "rustt",
     },
 )]
 fn language_string_to_enum_error(language_string: &str) {
@@ -40,17 +36,17 @@ fn language_string_to_enum_error(language_string: &str) {
     let err = result.err().unwrap();
 
     assert_eq!(err.kind(), io::ErrorKind::InvalidInput);
-    assert_eq!(err.to_string(), "Valid options are: rust | node");
+    assert_eq!(err.to_string(), "Valid options are: node | rust");
 }
 
 #[parameterized(
     language_enum = {
-        LanguageEnum::NodeModules,
-        LanguageEnum::Target,
+        LanguageEnum::Node,
+        LanguageEnum::Rust,
     },
     language_string = {
-        "node_modules",
-        "target",
+        "node",
+        "rust",
     },
 )]
 fn language_enum_to_string(language_enum: LanguageEnum, language_string: &str) {
@@ -60,14 +56,10 @@ fn language_enum_to_string(language_enum: LanguageEnum, language_string: &str) {
 #[parameterized(
     language_enum = {
         LanguageEnum::Node,
-        LanguageEnum::NodeModules,
         LanguageEnum::Rust,
-        LanguageEnum::Target,
     },
     expected_directory_enum = {
         DirectoryEnum::NodeModules,
-        DirectoryEnum::NodeModules,
-        DirectoryEnum::Target,
         DirectoryEnum::Target,
     },
 )]

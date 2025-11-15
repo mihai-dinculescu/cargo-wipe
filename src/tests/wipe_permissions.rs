@@ -11,11 +11,12 @@ mod wipe_permissions_tests {
 
     #[parameterized(
         language = {
-            LanguageEnum::Target, LanguageEnum::Target,
+            LanguageEnum::Rust, LanguageEnum::Rust,
+            LanguageEnum::Node, LanguageEnum::Node,
         },
-        wipe = { false, true },
+        wipe = { false, true, false, true },
     )]
-    fn rust_with_inaccessible_folders(language: LanguageEnum, wipe: bool) {
+    fn test_with_readonly_folders(language: LanguageEnum, wipe: bool) {
         use std::fs;
         use std::os::unix::fs::PermissionsExt;
 
@@ -29,57 +30,10 @@ mod wipe_permissions_tests {
         };
 
         let first_hit = test_run.hits.first().unwrap().clone();
+        let first_hit_parent = first_hit.parent().unwrap();
 
-        let permissions = fs::Permissions::from_mode(0o000);
-        fs::set_permissions(&first_hit, permissions).unwrap();
-
-        let mut buff = Cursor::new(Vec::new());
-        Wipe::new(&mut buff, &params).run().unwrap();
-
-        let output = std::str::from_utf8(buff.get_ref()).unwrap();
-        println!("{output}");
-
-        // hits should be listed and wiped if wipe is true
-        for path in &test_run.hits {
-            let expected = String::from(path.to_str().unwrap());
-
-            if path.to_str() == first_hit.to_str() {
-                assert!(!output.contains(&expected));
-                assert!(path.exists());
-            } else {
-                assert!(output.contains(&expected));
-                assert_eq!(path.exists(), !wipe);
-            }
-        }
-
-        // revert chmod
-        let permissions = fs::Permissions::from_mode(0o777);
-        fs::set_permissions(&first_hit, permissions).unwrap();
-    }
-
-    #[parameterized(
-        language = {
-            LanguageEnum::NodeModules, LanguageEnum::NodeModules,
-        },
-        wipe = { false, true },
-    )]
-    fn node_with_inaccessible_folders(language: LanguageEnum, wipe: bool) {
-        use std::fs;
-        use std::os::unix::fs::PermissionsExt;
-
-        let test_run = TestRun::new(&language, 3, 0);
-
-        let params = WipeParams {
-            wipe,
-            path: PathBuf::from(&test_run),
-            language,
-            ignores: Vec::new(),
-        };
-
-        let first_hit = test_run.hits.first().unwrap().clone();
-
-        let permissions = fs::Permissions::from_mode(0o000);
-        fs::set_permissions(&first_hit, permissions).unwrap();
+        let permissions = fs::Permissions::from_mode(0o555);
+        fs::set_permissions(first_hit_parent, permissions).unwrap();
 
         let mut buff = Cursor::new(Vec::new());
         Wipe::new(&mut buff, &params).run().unwrap();
@@ -87,21 +41,17 @@ mod wipe_permissions_tests {
         let output = std::str::from_utf8(buff.get_ref()).unwrap();
         println!("{output}");
 
-        // hits should be listed and wiped if wipe is true
-        for path in &test_run.hits {
+        // hits should be listed
+        // and wiped if wipe is true and delete permissions are present
+        for (i, path) in test_run.hits.iter().enumerate() {
             let expected = String::from(path.to_str().unwrap());
 
             assert!(output.contains(&expected));
-
-            if path.to_str() == first_hit.to_str() {
-                assert!(path.exists());
-            } else {
-                assert_eq!(path.exists(), !wipe);
-            }
+            assert_eq!(path.exists(), !wipe || i == 0);
         }
 
-        // revert chmod
+        // revert the permissions change for cleanup
         let permissions = fs::Permissions::from_mode(0o777);
-        fs::set_permissions(&first_hit, permissions).unwrap();
+        fs::set_permissions(first_hit_parent, permissions).unwrap();
     }
 }

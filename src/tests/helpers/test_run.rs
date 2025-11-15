@@ -2,7 +2,7 @@ use rand::{Rng, prelude::ThreadRng, rng};
 use rand_distr::Alphanumeric;
 use std::path::{Path, PathBuf};
 
-use crate::command::LanguageEnum;
+use crate::command::{DirectoryEnum, LanguageEnum};
 
 #[derive(Debug)]
 pub struct TestRun {
@@ -27,34 +27,46 @@ impl From<&TestRun> for PathBuf {
 
 impl TestRun {
     pub fn new(language: &LanguageEnum, hits_count: u32, ignores_count: u32) -> Self {
-        let mut test_path = TestRun::generate_parent();
+        let mut rng = rng();
+        let name = TestRun::generate_folder_name(&mut rng);
 
-        test_path.generate_hits(language, hits_count);
-        test_path.generate_ignores(language, ignores_count);
-        test_path.generate_no_hits();
-        test_path.generate_opposite(language);
-        test_path.generate_invalid(language);
-        test_path.generate_partial(language);
+        let path = std::env::temp_dir()
+            .join(Path::new(".cargo-wipe-tests"))
+            .join(Path::new(&name));
 
-        test_path
+        std::fs::create_dir_all(&path).unwrap();
+
+        let mut run = TestRun {
+            rng,
+            path,
+            hits: Vec::new(),
+            ignores: Vec::new(),
+            misses: Vec::new(),
+        };
+
+        run.generate_hits(language, hits_count);
+        run.generate_ignores(language, ignores_count);
+        run.generate_no_hits();
+        run.generate_opposite(language);
+        run.generate_invalid(language);
+        run.generate_partial(language);
+
+        run
     }
 
-    pub fn generate_hits(&mut self, language: &LanguageEnum, hits_count: u32) {
-        for _ in 0..hits_count {
-            let name: String = (&mut self.rng)
-                .sample_iter(&Alphanumeric)
-                .take(16)
-                .map(char::from)
-                .collect();
+    fn generate_hits(&mut self, language: &LanguageEnum, hits_count: u32) {
+        let directory: DirectoryEnum = language.into();
 
+        for _ in 0..hits_count {
+            let name = TestRun::generate_folder_name(&mut self.rng);
             let path = self
                 .path
                 .join(Path::new(&name))
-                .join(Path::new(&language.to_string()));
+                .join(Path::new(&directory.to_string()));
 
             std::fs::create_dir_all(&path).unwrap();
 
-            if language == &LanguageEnum::Target {
+            if language == &LanguageEnum::Rust {
                 let file_path = path.join(".rustc_info.json");
                 std::fs::File::create(file_path).unwrap();
             }
@@ -63,22 +75,19 @@ impl TestRun {
         }
     }
 
-    pub fn generate_ignores(&mut self, language: &LanguageEnum, ignores_count: u32) {
-        for _ in 0..ignores_count {
-            let name: String = (&mut self.rng)
-                .sample_iter(&Alphanumeric)
-                .take(16)
-                .map(char::from)
-                .collect();
+    fn generate_ignores(&mut self, language: &LanguageEnum, ignores_count: u32) {
+        let directory: DirectoryEnum = language.into();
 
+        for _ in 0..ignores_count {
+            let name = TestRun::generate_folder_name(&mut self.rng);
             let path = self
                 .path
                 .join(Path::new(&name))
-                .join(Path::new(&language.to_string()));
+                .join(Path::new(&directory.to_string()));
 
             std::fs::create_dir_all(&path).unwrap();
 
-            if language == &LanguageEnum::Target {
+            if language == &LanguageEnum::Rust {
                 let file_path = path.join(".rustc_info.json");
                 std::fs::File::create(file_path).unwrap();
             }
@@ -87,14 +96,9 @@ impl TestRun {
         }
     }
 
-    pub fn generate_no_hits(&mut self) {
+    fn generate_no_hits(&mut self) {
         for _ in 0..5 {
-            let name: String = (&mut self.rng)
-                .sample_iter(&Alphanumeric)
-                .take(16)
-                .map(char::from)
-                .collect();
-
+            let name = TestRun::generate_folder_name(&mut self.rng);
             let path = self.path.join(Path::new(&name));
 
             std::fs::create_dir_all(&path).unwrap();
@@ -103,19 +107,14 @@ impl TestRun {
         }
     }
 
-    pub fn generate_opposite(&mut self, language: &LanguageEnum) {
-        let opposite = if matches!(language, LanguageEnum::NodeModules) {
+    fn generate_opposite(&mut self, language: &LanguageEnum) {
+        let opposite = if matches!(language, LanguageEnum::Node) {
             "target"
         } else {
             "node_modules"
         };
 
-        let name: String = (&mut self.rng)
-            .sample_iter(&Alphanumeric)
-            .take(16)
-            .map(char::from)
-            .collect();
-
+        let name = TestRun::generate_folder_name(&mut self.rng);
         let path = self.path.join(Path::new(&name)).join(Path::new(opposite));
 
         std::fs::create_dir_all(&path).unwrap();
@@ -123,18 +122,15 @@ impl TestRun {
         self.misses.push(path);
     }
 
-    pub fn generate_invalid(&mut self, language: &LanguageEnum) {
-        if language == &LanguageEnum::Target {
-            let name: String = (&mut self.rng)
-                .sample_iter(&Alphanumeric)
-                .take(16)
-                .map(char::from)
-                .collect();
+    fn generate_invalid(&mut self, language: &LanguageEnum) {
+        let directory: DirectoryEnum = language.into();
 
+        if language == &LanguageEnum::Rust {
+            let name = TestRun::generate_folder_name(&mut self.rng);
             let path = self
                 .path
                 .join(Path::new(&name))
-                .join(Path::new(&language.to_string()));
+                .join(Path::new(&directory.to_string()));
 
             std::fs::create_dir_all(&path).unwrap();
 
@@ -142,18 +138,12 @@ impl TestRun {
         }
     }
 
-    pub fn generate_partial(&mut self, language: &LanguageEnum) {
-        let name: String = (&mut self.rng)
-            .sample_iter(&Alphanumeric)
-            .take(16)
-            .map(char::from)
-            .collect();
-        let name_inner: String = (&mut self.rng)
-            .sample_iter(&Alphanumeric)
-            .take(16)
-            .map(char::from)
-            .collect();
-        let name_inner = format!("{language}_{name_inner}");
+    fn generate_partial(&mut self, language: &LanguageEnum) {
+        let directory: DirectoryEnum = language.into();
+
+        let name = TestRun::generate_folder_name(&mut self.rng);
+        let name_inner = TestRun::generate_folder_name(&mut self.rng);
+        let name_inner = format!("{directory}_{name_inner}");
 
         let path = self
             .path
@@ -165,26 +155,10 @@ impl TestRun {
         self.misses.push(path);
     }
 
-    pub fn generate_parent() -> Self {
-        let mut rng = rng();
-        let name: String = (&mut rng)
-            .sample_iter(&Alphanumeric)
+    fn generate_folder_name(rng: &mut impl Rng) -> String {
+        rng.sample_iter(&Alphanumeric)
             .take(16)
             .map(char::from)
-            .collect();
-
-        let path = std::env::temp_dir()
-            .join(Path::new(".cargo-wipe-tests"))
-            .join(Path::new(&name));
-
-        std::fs::create_dir_all(&path).unwrap();
-
-        TestRun {
-            rng,
-            path,
-            hits: Vec::new(),
-            ignores: Vec::new(),
-            misses: Vec::new(),
-        }
+            .collect()
     }
 }
