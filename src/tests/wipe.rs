@@ -1,6 +1,7 @@
-use parameterized::parameterized;
 use std::path::PathBuf;
 use std::{io::Cursor, println};
+
+use rstest::rstest;
 use yansi::Paint as _;
 
 use crate::command::{DirectoryEnum, LanguageEnum};
@@ -9,14 +10,12 @@ use crate::wipe::Wipe;
 use crate::wipe_params::WipeParams;
 use crate::writer::{SPACING_FILES, SPACING_SIZE};
 
-#[parameterized(
-    language = {
-        LanguageEnum::Node, LanguageEnum::Node,
-        LanguageEnum::Rust, LanguageEnum::Rust,
-    },
-    wipe = { false, true, false, true },
-)]
-fn run_with_hits(language: LanguageEnum, wipe: bool) {
+#[rstest]
+#[case(LanguageEnum::Node, false)]
+#[case(LanguageEnum::Node, true)]
+#[case(LanguageEnum::Rust, false)]
+#[case(LanguageEnum::Rust, true)]
+fn run_with_hits(#[case] language: LanguageEnum, #[case] wipe: bool) {
     let test_run = TestRun::new(&language, 3, 0);
     let directory: DirectoryEnum = (&language).into();
 
@@ -90,14 +89,12 @@ fn run_with_hits(language: LanguageEnum, wipe: bool) {
     }
 }
 
-#[parameterized(
-    language = {
-        LanguageEnum::Node, LanguageEnum::Node,
-        LanguageEnum::Rust, LanguageEnum::Rust,
-    },
-    wipe = { false, true, false, true },
-)]
-fn run_no_hits(language: LanguageEnum, wipe: bool) {
+#[rstest]
+#[case(LanguageEnum::Node, false)]
+#[case(LanguageEnum::Node, true)]
+#[case(LanguageEnum::Rust, false)]
+#[case(LanguageEnum::Rust, true)]
+fn run_no_hits(#[case] language: LanguageEnum, #[case] wipe: bool) {
     let test_run = TestRun::new(&language, 0, 0);
 
     let params = WipeParams {
@@ -144,14 +141,12 @@ fn run_no_hits(language: LanguageEnum, wipe: bool) {
     assert!(output.contains(&expected));
 }
 
-#[parameterized(
-    language = {
-        LanguageEnum::Node, LanguageEnum::Node,
-        LanguageEnum::Rust, LanguageEnum::Rust,
-    },
-    wipe = { false, true, false, true },
-)]
-fn run_with_ignores(language: LanguageEnum, wipe: bool) {
+#[rstest]
+#[case(LanguageEnum::Node, false)]
+#[case(LanguageEnum::Node, true)]
+#[case(LanguageEnum::Rust, false)]
+#[case(LanguageEnum::Rust, true)]
+fn run_with_ignores(#[case] language: LanguageEnum, #[case] wipe: bool) {
     let test_run = TestRun::new(&language, 3, 3);
 
     let params = WipeParams {

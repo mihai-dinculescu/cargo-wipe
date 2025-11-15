@@ -129,13 +129,16 @@ impl DirInfo {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use parameterized::parameterized;
+    use rstest::rstest;
 
-    #[parameterized(
-        size = { 0, 512, 1024, 1024_usize.pow(2), 1024_usize.pow(3), 1024_usize.pow(4) },
-        output = { "0 bytes", "512 bytes", "1.00 KiB", "1.00 MiB", "1.00 GiB", "1.00 TiB" },
-    )]
-    fn size_formatted_flex(size: usize, output: &str) {
+    #[rstest]
+    #[case(0, "0 bytes")]
+    #[case(512, "512 bytes")]
+    #[case(1024, "1.00 KiB")]
+    #[case(1024_usize.pow(2), "1.00 MiB")]
+    #[case(1024_usize.pow(3), "1.00 GiB")]
+    #[case(1024_usize.pow(4), "1.00 TiB")]
+    fn test_size_formatted_flex(#[case] size: usize, #[case] output: &str) {
         let di = DirInfo {
             dir_count: 0,
             file_count: 0,

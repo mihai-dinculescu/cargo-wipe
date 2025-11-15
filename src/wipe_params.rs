@@ -23,3 +23,34 @@ impl WipeParams {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use rstest::rstest;
+
+    use crate::command::{Args, LanguageEnum};
+    use crate::wipe_params::WipeParams;
+
+    #[rstest]
+    #[case(Args { language: LanguageEnum::Node, wipe: false, ignores: Vec::new() })]
+    #[case(Args { language: LanguageEnum::Node, wipe: true, ignores: Vec::new() })]
+    #[case(Args { language: LanguageEnum::Node, wipe: true, ignores: vec![PathBuf::from("example/path")] })]
+    #[case(Args { language: LanguageEnum::Rust, wipe: false, ignores: Vec::new() })]
+    #[case(Args { language: LanguageEnum::Rust, wipe: true, ignores: Vec::new() })]
+    #[case(Args { language: LanguageEnum::Rust, wipe: true, ignores: vec![PathBuf::from("example/path")] })]
+    fn test_wipe_params(#[case] args: Args) {
+        let params = WipeParams::new(&args).unwrap();
+
+        assert_eq!(
+            params,
+            WipeParams {
+                wipe: args.wipe,
+                path: std::env::current_dir().unwrap(),
+                language: args.language,
+                ignores: args.ignores,
+            }
+        );
+    }
+}

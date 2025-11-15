@@ -1,22 +1,21 @@
 #[cfg(target_os = "linux")]
 mod wipe_permissions_tests {
-    use parameterized::parameterized;
     use std::io::Cursor;
     use std::path::PathBuf;
+
+    use rstest::rstest;
 
     use crate::command::LanguageEnum;
     use crate::tests::helpers::test_run::TestRun;
     use crate::wipe::Wipe;
     use crate::wipe_params::WipeParams;
 
-    #[parameterized(
-        language = {
-            LanguageEnum::Rust, LanguageEnum::Rust,
-            LanguageEnum::Node, LanguageEnum::Node,
-        },
-        wipe = { false, true, false, true },
-    )]
-    fn test_with_readonly_folders(language: LanguageEnum, wipe: bool) {
+    #[rstest]
+    #[case(LanguageEnum::Node, false)]
+    #[case(LanguageEnum::Node, true)]
+    #[case(LanguageEnum::Rust, false)]
+    #[case(LanguageEnum::Rust, true)]
+    fn test_with_readonly_folders(#[case] language: LanguageEnum, #[case] wipe: bool) {
         use std::fs;
         use std::os::unix::fs::PermissionsExt;
 

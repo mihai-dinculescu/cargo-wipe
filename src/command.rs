@@ -91,3 +91,63 @@ impl fmt::Display for DirectoryEnum {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{io, str::FromStr};
+
+    use rstest::rstest;
+
+    use crate::command::{DirectoryEnum, LanguageEnum};
+
+    #[rstest]
+    #[case("node", LanguageEnum::Node)]
+    #[case("rust", LanguageEnum::Rust)]
+    #[case("RUST", LanguageEnum::Rust)]
+    #[case("ruSt ", LanguageEnum::Rust)]
+    fn language_string_to_enum(#[case] language_string: &str, #[case] language_enum: LanguageEnum) {
+        assert_eq!(
+            LanguageEnum::from_str(language_string).unwrap(),
+            language_enum
+        );
+    }
+
+    #[rstest]
+    #[case("node-modules")]
+    #[case("rustt")]
+    fn language_string_to_enum_error(#[case] language_string: &str) {
+        let result = LanguageEnum::from_str(language_string);
+        let err = result.err().unwrap();
+
+        assert_eq!(err.kind(), io::ErrorKind::InvalidInput);
+        assert_eq!(err.to_string(), "Valid options are: node | rust");
+    }
+
+    #[rstest]
+    #[case(LanguageEnum::Node, "node")]
+    #[case(LanguageEnum::Rust, "rust")]
+    fn language_enum_to_string(#[case] language_enum: LanguageEnum, #[case] language_string: &str) {
+        assert_eq!(language_enum.to_string(), language_string);
+    }
+
+    #[rstest]
+    #[case(LanguageEnum::Node, DirectoryEnum::NodeModules)]
+    #[case(LanguageEnum::Rust, DirectoryEnum::Target)]
+    fn language_enum_to_directory_enum(
+        #[case] language_enum: LanguageEnum,
+        #[case] expected_directory_enum: DirectoryEnum,
+    ) {
+        let directory_enum: DirectoryEnum = language_enum.into();
+        assert_eq!(directory_enum, expected_directory_enum);
+    }
+
+    #[rstest]
+    #[case(DirectoryEnum::NodeModules, "node_modules")]
+    #[case(DirectoryEnum::Target, "target")]
+    fn directory_enum_to_string(
+        #[case] directory_enum: DirectoryEnum,
+        #[case] directory_string: &str,
+    ) {
+        assert_eq!(directory_enum.to_string(), directory_string);
+    }
+}
