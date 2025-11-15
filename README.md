@@ -88,8 +88,8 @@ If you're thinking to create a PR with large feature/change, please first discus
 
 [crates_badge]: https://img.shields.io/crates/v/cargo-wipe.svg
 [crates]: https://crates.io/crates/cargo-wipe
-[ci_badge]: https://github.com/mihai-dinculescu/cargo-wipe/workflows/CI/badge.svg?branch=main
-[ci]: https://github.com/mihai-dinculescu/cargo-wipe/actions
+[ci_badge]: https://github.com/mihai-dinculescu/cargo-wipe/actions/workflows/ci.yml/badge.svg
+[ci]: https://github.com/mihai-dinculescu/cargo-wipe/actions/workflows/ci.yml
 [codecov_badge]: https://codecov.io/gh/mihai-dinculescu/cargo-wipe/branch/main/graph/badge.svg
 [codecov]: https://codecov.io/gh/mihai-dinculescu/cargo-wipe
 [license_badge]: https://img.shields.io/crates/l/cargo-wipe.svg
