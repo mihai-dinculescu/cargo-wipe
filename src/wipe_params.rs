@@ -40,6 +40,9 @@ mod tests {
     #[case(Args { language: LanguageEnum::Rust, wipe: false, ignores: Vec::new() })]
     #[case(Args { language: LanguageEnum::Rust, wipe: true, ignores: Vec::new() })]
     #[case(Args { language: LanguageEnum::Rust, wipe: true, ignores: vec![PathBuf::from("example/path")] })]
+    #[case(Args { language: LanguageEnum::Terraform, wipe: false, ignores: Vec::new() })]
+    #[case(Args { language: LanguageEnum::Terraform, wipe: true, ignores: Vec::new() })]
+    #[case(Args { language: LanguageEnum::Terraform, wipe: true, ignores: vec![PathBuf::from("example/path")] })]
     fn test_wipe_params(#[case] args: Args) {
         let params = WipeParams::new(&args).unwrap();
 

@@ -47,7 +47,7 @@ impl TestRun {
         run.generate_hits(language, hits_count);
         run.generate_ignores(language, ignores_count);
         run.generate_no_hits();
-        run.generate_opposite(language);
+        run.generate_different_language_hits(language);
         run.generate_invalid(language);
         run.generate_partial(language);
 
@@ -107,15 +107,18 @@ impl TestRun {
         }
     }
 
-    fn generate_opposite(&mut self, language: &LanguageEnum) {
-        let opposite = if matches!(language, LanguageEnum::Node) {
-            "target"
+    fn generate_different_language_hits(&mut self, language: &LanguageEnum) {
+        let different_language = if language == &LanguageEnum::Node {
+            DirectoryEnum::Target.to_string()
         } else {
-            "node_modules"
+            DirectoryEnum::NodeModules.to_string()
         };
 
         let name = TestRun::generate_folder_name(&mut self.rng);
-        let path = self.path.join(Path::new(&name)).join(Path::new(opposite));
+        let path = self
+            .path
+            .join(Path::new(&name))
+            .join(Path::new(&different_language));
 
         std::fs::create_dir_all(&path).unwrap();
 

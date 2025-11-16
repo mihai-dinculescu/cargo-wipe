@@ -6,8 +6,9 @@ use clap::{Parser, ValueEnum, arg, command};
 #[derive(Debug, Parser)]
 #[command(name = "cargo", bin_name = "cargo")]
 pub enum Command {
-    /// Recursively finds and optionally wipes all "target" (Rust) or
-    /// "node_modules" (Node) folders that are found in the current path.
+    /// Recursively finds and optionally wipes all "target" (Rust),
+    /// "node_modules" (Node), or ".terraform" (Terraform) folders that
+    /// are found in the current path.
     /// Add the `-w` flag to wipe all folders found. USE WITH CAUTION!
     Wipe(Args),
 }
@@ -33,12 +34,14 @@ pub struct Args {
 pub enum LanguageEnum {
     Node,
     Rust,
+    Terraform,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum DirectoryEnum {
     NodeModules,
     Target,
+    Terraform,
 }
 
 impl str::FromStr for LanguageEnum {
@@ -48,9 +51,10 @@ impl str::FromStr for LanguageEnum {
         match value.to_lowercase().trim() {
             "node" => Ok(LanguageEnum::Node),
             "rust" => Ok(LanguageEnum::Rust),
+            "terraform" => Ok(LanguageEnum::Terraform),
             _ => Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "Valid options are: node | rust",
+                "Valid options are: node | rust | terraform",
             )),
         }
     }
@@ -61,6 +65,7 @@ impl fmt::Display for LanguageEnum {
         match self {
             LanguageEnum::Node => write!(f, "node"),
             LanguageEnum::Rust => write!(f, "rust"),
+            LanguageEnum::Terraform => write!(f, "terraform"),
         }
     }
 }
@@ -70,6 +75,7 @@ impl From<LanguageEnum> for DirectoryEnum {
         match language {
             LanguageEnum::Node => DirectoryEnum::NodeModules,
             LanguageEnum::Rust => DirectoryEnum::Target,
+            LanguageEnum::Terraform => DirectoryEnum::Terraform,
         }
     }
 }
@@ -79,6 +85,7 @@ impl From<&LanguageEnum> for DirectoryEnum {
         match language {
             LanguageEnum::Node => DirectoryEnum::NodeModules,
             LanguageEnum::Rust => DirectoryEnum::Target,
+            LanguageEnum::Terraform => DirectoryEnum::Terraform,
         }
     }
 }
@@ -88,6 +95,7 @@ impl fmt::Display for DirectoryEnum {
         match self {
             DirectoryEnum::NodeModules => write!(f, "node_modules"),
             DirectoryEnum::Target => write!(f, "target"),
+            DirectoryEnum::Terraform => write!(f, ".terraform"),
         }
     }
 }
@@ -103,6 +111,7 @@ mod tests {
     #[rstest]
     #[case("node", LanguageEnum::Node)]
     #[case("rust", LanguageEnum::Rust)]
+    #[case("terraform", LanguageEnum::Terraform)]
     #[case("RUST", LanguageEnum::Rust)]
     #[case("ruSt ", LanguageEnum::Rust)]
     fn language_string_to_enum(#[case] language_string: &str, #[case] language_enum: LanguageEnum) {
@@ -120,12 +129,16 @@ mod tests {
         let err = result.err().unwrap();
 
         assert_eq!(err.kind(), io::ErrorKind::InvalidInput);
-        assert_eq!(err.to_string(), "Valid options are: node | rust");
+        assert_eq!(
+            err.to_string(),
+            "Valid options are: node | rust | terraform"
+        );
     }
 
     #[rstest]
     #[case(LanguageEnum::Node, "node")]
     #[case(LanguageEnum::Rust, "rust")]
+    #[case(LanguageEnum::Terraform, "terraform")]
     fn language_enum_to_string(#[case] language_enum: LanguageEnum, #[case] language_string: &str) {
         assert_eq!(language_enum.to_string(), language_string);
     }
@@ -133,6 +146,7 @@ mod tests {
     #[rstest]
     #[case(LanguageEnum::Node, DirectoryEnum::NodeModules)]
     #[case(LanguageEnum::Rust, DirectoryEnum::Target)]
+    #[case(LanguageEnum::Terraform, DirectoryEnum::Terraform)]
     fn language_enum_to_directory_enum(
         #[case] language_enum: LanguageEnum,
         #[case] expected_directory_enum: DirectoryEnum,
@@ -144,6 +158,7 @@ mod tests {
     #[rstest]
     #[case(DirectoryEnum::NodeModules, "node_modules")]
     #[case(DirectoryEnum::Target, "target")]
+    #[case(DirectoryEnum::Terraform, ".terraform")]
     fn directory_enum_to_string(
         #[case] directory_enum: DirectoryEnum,
         #[case] directory_string: &str,

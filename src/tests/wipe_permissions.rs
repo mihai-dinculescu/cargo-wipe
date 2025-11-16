@@ -15,6 +15,8 @@ mod wipe_permissions_tests {
     #[case(LanguageEnum::Node, true)]
     #[case(LanguageEnum::Rust, false)]
     #[case(LanguageEnum::Rust, true)]
+    #[case(LanguageEnum::Terraform, false)]
+    #[case(LanguageEnum::Terraform, true)]
     fn test_with_readonly_folders(#[case] language: LanguageEnum, #[case] wipe: bool) {
         use std::fs;
         use std::os::unix::fs::PermissionsExt;

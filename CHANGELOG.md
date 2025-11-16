@@ -6,6 +6,10 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+### Added
+
+- Added support for wiping `.terraform` folders in Terraform projects. Use the `terraform` language to target these folders.
+
 ### Fixed
 
 - Fixed an issue where folders that failed to delete were still counted as freed space.

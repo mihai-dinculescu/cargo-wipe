@@ -5,7 +5,8 @@
 [![codecov][codecov_badge]][codecov]
 [![license][license_badge]][license]
 [![Crates.io][crates_installs_badge]][crates]\
-Cargo subcommand that recursively finds and optionally wipes all "target" or "node_modules" folders that are found in the current path.
+Cargo subcommand that recursively finds and optionally wipes all "target" (Rust), 
+"node_modules" (Node), or ".terraform" (Terraform) folders that are found in the current path.
 
 ## Usage
 

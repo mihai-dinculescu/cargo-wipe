@@ -15,6 +15,8 @@ use crate::writer::{SPACING_FILES, SPACING_SIZE};
 #[case(LanguageEnum::Node, true)]
 #[case(LanguageEnum::Rust, false)]
 #[case(LanguageEnum::Rust, true)]
+#[case(LanguageEnum::Terraform, false)]
+#[case(LanguageEnum::Terraform, true)]
 fn run_with_hits(#[case] language: LanguageEnum, #[case] wipe: bool) {
     let test_run = TestRun::new(&language, 3, 0);
     let directory: DirectoryEnum = (&language).into();
@@ -94,6 +96,8 @@ fn run_with_hits(#[case] language: LanguageEnum, #[case] wipe: bool) {
 #[case(LanguageEnum::Node, true)]
 #[case(LanguageEnum::Rust, false)]
 #[case(LanguageEnum::Rust, true)]
+#[case(LanguageEnum::Terraform, false)]
+#[case(LanguageEnum::Terraform, true)]
 fn run_no_hits(#[case] language: LanguageEnum, #[case] wipe: bool) {
     let test_run = TestRun::new(&language, 0, 0);
 
@@ -146,6 +150,8 @@ fn run_no_hits(#[case] language: LanguageEnum, #[case] wipe: bool) {
 #[case(LanguageEnum::Node, true)]
 #[case(LanguageEnum::Rust, false)]
 #[case(LanguageEnum::Rust, true)]
+#[case(LanguageEnum::Terraform, false)]
+#[case(LanguageEnum::Terraform, true)]
 fn run_with_ignores(#[case] language: LanguageEnum, #[case] wipe: bool) {
     let test_run = TestRun::new(&language, 3, 3);
 
