@@ -6,6 +6,8 @@ file. This change log follows the conventions of
 
 ## [Unreleased]
 
+## [v0.4.0] - 2024-11-16
+
 ### Added
 
 - Added support for wiping `.terraform` folders in Terraform projects. Use the `terraform` language to target these folders.
@@ -104,6 +106,7 @@ file. This change log follows the conventions of
 ### Initial Release of cargo-wipe
 
 [unreleased]: https://github.com/mihai-dinculescu/cargo-wipe
+[v0.4.0]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.4.0
 [v0.3.3]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.3
 [v0.3.2]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.2
 [v0.3.1]: https://github.com/mihai-dinculescu/cargo-wipe/tree/v0.3.1
