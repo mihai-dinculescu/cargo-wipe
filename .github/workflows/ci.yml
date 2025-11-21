@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: davidB/rust-cargo-make@v1
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Run format
         run: cargo make format
       - name: Run check
