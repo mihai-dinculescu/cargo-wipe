@@ -19,5 +19,5 @@ yansi = "1.0"
 
 [dev-dependencies]
 rand = "0.9"
-rand_distr = "0.5"
+rand_distr = "0.6"
 rstest = "0.26"
